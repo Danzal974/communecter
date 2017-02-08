@@ -383,16 +383,19 @@ function autoCompleteSearch(name, locality, indexMin, indexMax, callBack){
 
 var directory = {
 
-    elemClass : '.menuSmallBlockUI .searchEntityContainer ',
-    path : 'div.menuSmallBlockUI div.favSection div.searchEntityContainer',
+    elemClass : smallMenu.destination+' .searchEntityContainer ',
+    path : 'div'+smallMenu.destination+' div.favSection div.searchEntityContainer',
     tagsT : [],
     scopesT :[],
     multiTagsT : [],
     multiScopesT :[],
 
     showResultsDirectoryHtml : function ( data, contentType, size ){ //size == null || min || max
-
+      
+        console.log("showResultsDirectoryHtml data", typeof data, data);
         var str = "";
+
+        if(typeof data == "object" && data!=null)
         $.each(data, function(i, o) {
             itemType=(contentType) ? contentType :o.type;
             if( itemType )
@@ -509,7 +512,7 @@ var directory = {
        
               //mylog.dir(o);
               //mylog.log(typeof o.startDate);
-              console.log("/////////////////////////// directory.js",o);
+              //console.log("/////////////////////////// directory.js",o);
               //moment.locale("fr");
               var startDate = notEmpty(o.startDate) ? moment(o.startDate).local().locale("fr").format("DD MMMM YYYY - HH:mm") : null;
               var endDate   = notEmpty(o.endDate) ? moment(o.endDate).local().locale("fr").format("DD MMMM YYYY - HH:mm") : null;
@@ -677,12 +680,14 @@ var directory = {
 
       $.each( list, function(key,list)
       {
-        var subContent = directory.showResultsDirectoryHtml ( list, key, "min" );
+        var subContent = directory.showResultsDirectoryHtml ( list, key);
         if( notEmpty(subContent) ){
           favTypes.push(key);
-          $(".menuSmallBlockUI").append("<div class='"+key+"fav favSection '><div class=' col-xs-12 col-sm-10 padding-15'><h2 class='homestead'> "+key+" <i class='fa fa-angle-down'></i> </h2>"+
-                subContent+
-                "</div>");
+          $(smallMenu.destination).append("<div class='"+key+"fav favSection '>"+
+                                            "<div class=' col-xs-12 col-sm-10 padding-15'>"+
+                                            "<h2 class='homestead text-left padding-15'><i class='fa fa-angle-down'></i> "+t(key)+"</h2>"+
+                                            subContent+
+                                            "</div>");
           color = (typeObj[key] && typeObj[key].color) ? typeObj[key].color : "white";
           $(".sectionFilters").append(" <span class=' btn btn-xs favSectionBtn favSectionBtnNew  bg-"+color+"'><a class='text-black helvetica' href='javascript:toggle(\"."+key+"fav\",\".favSection\",1)'> "+key+"</a></span> ")
         }
@@ -745,9 +750,11 @@ var directory = {
             $("#listTags").removeClass("hide");
         //$("#btn-open-tags").append("("+$(".favElBtn").length+")");
     },
+    
     showFilters : function () { 
         $("#listTags").toggleClass("hide");
     },
+
     addMultiTagsAndScope : function() { 
       directory.multiTagsT = [];
       directory.multiScopesT = [];
@@ -791,7 +798,7 @@ var directory = {
           }
         }
         
-        if(showAll)
+        if( showAll )
           directory.showAll(parents,children);
     },
 

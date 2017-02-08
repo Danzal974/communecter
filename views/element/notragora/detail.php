@@ -26,11 +26,12 @@
 	    filter: progid:DXImageTransform.Microsoft.Shadow(color=#656565, Direction=NaN, Strength=5) !important;
 	}
 	.img-header{
-		max-height: 300px;
-		min-height: 300px;
+		max-height: 350px;
+		min-height: 350px;
 		width:100%;
-		background-image: url("<?php echo Yii::app()->theme->baseUrl; ?>/assets/images/tropic.jpg");
-		background-size: 100%;
+		overflow: hidden;
+		/*background-image: url("<?php echo Yii::app()->theme->baseUrl; ?>/assets/images/tropic.jpg");
+		background-size: 100%;*/
 	}
 	.main-col-search{
 		padding:0px;
@@ -81,7 +82,7 @@
 		padding:10px 20px;
 		font-weight: 700;
 		height:50px;
-		margin-top:-50px;
+		margin-top:0px;
 		background-color: rgba(255, 255, 255, 0.8);
 	}
 	.btn-follow{
@@ -145,11 +146,27 @@
 	    font-size: 50px;
 	    color: rgba(255, 255,255, 0.8);
 	}
+
+	.fileupload, .fileupload-preview.thumbnail, .fileupload-new .thumbnail, 
+	.fileupload-new .thumbnail img, .fileupload-preview.thumbnail img {
+	    width: 100%!important;
+	    max-height:unset!important;
+	}
+
+	#fileuploadContainer{
+		margin:-1px!important;
+	}
+	#fileuploadContainer .thumbnail{
+		border-radius: 0px!important
+	}
+	#profil_imgPreview{
+
+	}
 </style>
 	<div class="col-lg-10 col-md-10 col-sm-9 no-padding" id="onepage">
 
 		<?php if ($type == "poi"){ ?>
-			<?php if($element["type"]=="video" && @$element["medias"]){ 
+			<?php if(@$element["type"]=="video" && @$element["medias"]){ 
 				$videoLink=str_replace ( "autoplay=1" , "autoplay=0" , @$element["medias"][0]["content"]["videoLink"]  );
 			?>
 				<div class="col-xs-12">
@@ -172,7 +189,26 @@
 				</div>
 		<?php } ?>
 		<?php }else{ ?>
-				<div class="img-header"></div>
+				<div class="img-header">
+					
+					<?php 
+						if(@$element["profilMediumImageUrl"] && !empty($element["profilMediumImageUrl"]))
+							$images=array("profil"=> array($element["profilMediumImageUrl"]));
+						else 
+							$images="";	
+
+						$this->renderPartial('../pod/fileupload', array(  "itemId" => (string) $element["_id"],
+																		  "type" => $type,
+																		  "resize" => false,
+																		  "contentId" => Document::IMG_PROFIL,
+																		  "show" => true,
+																		  "editMode" => $edit,
+																		  "image" => $images,
+																		  "openEdition" => $openEdition)); 
+					//	$profilThumbImageUrl = Element::getImgProfil(@$entity, "profilMediumImageUrl", $this->module->assetsUrl);
+					?>
+
+				</div>
 		<div class="element-name text-dark">
 			<?php echo @$element["name"]; ?>
 			<!-- <button class="btn btn-default btn-follow"><i class="fa fa-star"></i> SUIVRE</button> -->
@@ -351,7 +387,7 @@
 		$("#nbMember").html(nbMember);
 		$("#nbMemberTotal").html(nbAdmin+nbMember);
 
-		var url = "news/index/type/"+contextType+"/id/"+contextId+"?isFirst=1&";
+		/*var url = "news/index/type/"+contextType+"/id/"+contextId+"?isFirst=1&";
 		console.log("URL", url);
 		if(contextType=="projects" || contextType=="citoyens"){
 			ajaxPost('#timeline-page', baseUrl+'/'+moduleId+'/'+url+"renderPartial=true&tpl=co2&nbCol=2", 
@@ -364,7 +400,7 @@
 			getAjax('#comment-page',baseUrl+'/'+moduleId+"/comment/index/type/"+contextType+"/id/"+contextId,function(){ 
 					
 			},"html");
-		}
+		}*/
 		$(".deleteThisBtn").off().on("click",function () 
 		{
 			mylog.log("deleteThisBtn click");
@@ -399,8 +435,7 @@
 			});
 
 		});
-		$(".editThisBtn").off().on("click",function () 
-		{
+		$(".editThisBtn").off().on("click",function (){
 	        $(this).empty().html('<i class="fa fa-spinner fa-spin"></i>');
 	        var btnClick = $(this);
 	        var id = $(this).data("id");
@@ -410,7 +445,8 @@
 
 		initMenuDetail();
 	});
-	function requestFullScreen(element) {
+
+function requestFullScreen(element) {
     // Supports most browsers and their versions.
     var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullscreen;
 
@@ -455,7 +491,7 @@ function initMenuDetail(){
     	var poisHtml = directory.showResultsDirectoryHtml(pois, "poi");
     	$("#section-directory").html(poisHtml);
 		// 	var type = "?type=poi";
-  //   	ajaxPost('#section-directory', baseUrl+'/'+moduleId+"/default/directory"+type, 
+ 		//  ajaxPost('#section-directory', baseUrl+'/'+moduleId+"/default/directory"+type, 
 		// 	null,
 		// 	function(){ 
 				
