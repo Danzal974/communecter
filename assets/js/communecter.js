@@ -954,19 +954,37 @@ function showAjaxPanel (url,title,icon, mapEnd) {
 
 			if(mapEnd)
 				showMap(true);
-			// setTimeout(function(){
-			// 	mylog.log("call timeout MAP MAP");
-			// 	getAjax('#mainMap',baseUrl+'/'+moduleId+"/search/mainmap",function(){ 
-			// 		toastr.info('<i class="fa fa-check"></i> Cartographie activée');
-			// 		showMap(false); 
-			// 		$("#btn-toogle-map").show(400);
-			// 		//mylog.log("getAJAX OK timeout MAIN MAP");
-					
-			// 	},"html");
-			// }, 2000);
+
+
+    		if( notNull(contextData) && contextData.type && contextData.id )
+    		{
+        		uploadObj.type = contextData.type;
+        		uploadObj.id = contextData.id;
+        	}
+        	if(debug){
+        		getAjax(null, baseUrl+'/'+moduleId+"/log/dbaccess", function(data){ 
+        			if(prevDbAccessCount == 0){
+        				dbAccessCount = parseInt(data);
+        				prevDbAccessCount = dbAccessCount;
+        			} else {
+        				dbAccessCount = parseInt(data)-prevDbAccessCount;
+        				prevDbAccessCount = parseInt(data);
+        			}
+        			//toastr.success('prevDbAccessCount:'+prevDbAccessCount);
+        			$(".dbAccessBtn").remove();
+        			$(".menu-info-profil").prepend('<span class="text-red dbAccessBtn" ><i class="fa fa-database text-red text-bold fa-2x"></i> '+dbAccessCount+' <a href="javascript:clearDbAccess();"><i class="fa fa-times text-red text-bold"></i></a></span>');
+        		},null);
+        	}
 
 		},"html");
 	}, 800);
+}
+prevDbAccessCount = 0; 
+function clearDbAccess() { 
+	getAjax(null, baseUrl+'/'+moduleId+"/log/clear", function(data){ 
+		$(".dbAccessBtn").remove();
+		prevDbAccessCount = 0; 
+	});
 }
 /* ****************
 visualize all tagged elements on a map
@@ -1065,6 +1083,8 @@ function activateHoverMenu () {
 
 var favTypes = [];
 var smallMenu = {
+	destination : ".menuSmallBlockUI",
+	inBlockUI : true,
 	//smallMenu.openAjax(\''+baseUrl+'/'+moduleId+'/collections/list/col/'+obj.label+'\',\''+obj.label+'\',\'fa-folder-open\',\'yellow\')
 	//the url must return a list like userConnected.list
 	openAjax : function  (url,title,icon,color,title1,params,callback) { 
@@ -1086,14 +1106,13 @@ var smallMenu = {
 			else 
 				directory.buildList(data.list);
 			
-
 		   	$('.searchSmallMenu').off().on("keyup",function() { 
 				directory.search ( ".favSection", $(this).val() );
 		   	});
 		   	if( notNull(params) && notNull(params.otherCollectionList) && typeof params.otherCollectionList == "function" )
 		   		params.otherCollectionList();
 		   	else	
-		   		buildCollectionList( "linkList" ,"#listCollections",function(){ $("#listCollections").html("<h2 class='homestead'>Collections</h2>"); });
+		   		collection.buildCollectionList( "linkList" ,"#listCollections",function(){ $("#listCollections").html("<h2 class='homestead'>Collections</h2>"); });
 
 		   	if (typeof callback == "function") 
 				callback();
@@ -1136,7 +1155,7 @@ var smallMenu = {
 					"<div class='homestead titleSmallMenu' style='font-size:45px'> "+
 						title1+' <i class="fa fa-angle-right"></i> '+title+" <i class='fa "+icon+" text-"+color+"'></i>"+
 					"</div>"+
-					"<input name='searchSmallMenu' class='searchSmallMenu text-black' placeholder='vous cherchez quoi ?' style='margin-bottom:8px;width: 300px;font-size: x-large;'><br/>"+
+					"<input name='searchSmallMenu' class='searchSmallMenu text-black' placeholder='rechercher' style='margin-bottom:8px;width: 300px;font-size: x-large;'><br/>"+
 					"<span class='text-extra-small helvetica sectionFilters'>"+
 						" <span class='btn btn-xs favSectionBtn btn-default'><a class='text-black helvetica ' href='javascript:directory.toggleEmptyParentSection(\".favSection\",null,\".searchEntityContainer\",1)'> Tout voir</a></span> </span>"+
 					" </span><br/>"+
@@ -1147,36 +1166,43 @@ var smallMenu = {
 	//opens any html without post processing
 	openAjaxHTML : function  (url,title) { 
 		smallMenu.open( );
-		getAjax( ".menuSmallBlockUI" , url , null,"html" );
+		getAjax( smallMenu.destination , url , null,"html" );
 	},
+	//content Loader can go into a block
 	open : function (content) { 
-		menuContent = (content) ? content : $(".menuSmall").html();
-		//buildCollectionList ();
-
-		$.blockUI({ 
-			title : 'Welcome to your page', 
-			message : menuContent,
-			onOverlayClick: $.unblockUI,
-	        css: { 
-	         //    border: 'none', 
-	         //    padding: '15px', 
-	         //    backgroundColor: 'rgba(0,0,0,0.7)', 
-	         //    '-webkit-border-radius': '10px', 
-	         //    '-moz-border-radius': '10px', 
-	         //    color: '#fff' ,
-	        	// "cursor": "pointer"
-	        },
-			overlayCSS: { backgroundColor: '#000'}
-		});
-		$(".blockPage").addClass("menuSmallBlockUI");
-		// If network, check width of menu small
-		if( typeof globalTheme != "undefined" && globalTheme == "network" ) {
-			if($("#ficheInfoDetail").is(":visible"))
-				$(".menuSmallBlockUI").css("cssText", "width: 100% !important;left: 0% !important;");
-			else
-				$(".menuSmallBlockUI").css("cssText", "width: 83.5% !important;left: 16.5% !important;");
+		if(!smallMenu.inBlockUI){
+			$(smallMenu.destination).html( content );
+			$.unblockUI();
 		}
-		bindLBHLinks();
+		else {
+			menuContent = (content) ? content : $(".menuSmall").html();
+			//buildCollectionList ();
+
+			$.blockUI({ 
+				title : 'Welcome to your page', 
+				message : menuContent,
+				onOverlayClick: $.unblockUI,
+		        css: { 
+		         //    border: 'none', 
+		         //    padding: '15px', 
+		         //    backgroundColor: 'rgba(0,0,0,0.7)', 
+		         //    '-webkit-border-radius': '10px', 
+		         //    '-moz-border-radius': '10px', 
+		         //    color: '#fff' ,
+		        	// "cursor": "pointer"
+		        },
+				overlayCSS: { backgroundColor: '#000'}
+			});
+			$(".blockPage").addClass(smallMenu.destination.slice(1));
+			// If network, check width of menu small
+			if( typeof globalTheme != "undefined" && globalTheme == "network" ) {
+				if($("#ficheInfoDetail").is(":visible"))
+					$(smallMenu.destination).css("cssText", "width: 100% !important;left: 0% !important;");
+				else
+					$(smallMenu.destination).css("cssText", "width: 83.5% !important;left: 16.5% !important;");
+			}
+			bindLBHLinks();
+		}
 	}
 }
 
@@ -2033,7 +2059,7 @@ var collection = {
 							delete userConnected.collections[params.name];
 							smallMenu.open();
 						}
-						buildCollectionList("col_Link_Label_Count",".menuSmallBtns", function() { $(".collection").remove() })
+						collection.buildCollectionList("col_Link_Label_Count",".menuSmallBtns", function() { $(".collection").remove() })
 					}
 					else
 						toastr.error(data.msg);
@@ -2080,6 +2106,22 @@ var collection = {
 			},"none");
 		} else
 			toastr.error(trad.LoginFirst);
+	},
+	buildCollectionList : function ( tpl, appendTo, reset ) {
+		if(typeof reset == "function")
+			reset();
+		str = "";
+		$.each(userConnected.collections, function(col,list){ 
+			var colcount = 0;
+			$.each(list, function(type,entries){
+				colcount += Object.keys(entries).length;
+			}); 
+			str += js_templates[ tpl ]({
+				label : col,
+				labelCount : colcount
+			}) ;
+		});
+		$(appendTo).append(str);
 	}
 };
 
@@ -2294,51 +2336,66 @@ var elementLib = {
 	        }
 	    });
 	},
-
+	getDynFormObj : function(type, callback,afterLoad, data ){
+		if(typeof type == "object"){
+			specs = type;
+			if( notNull(specs.col) ) uploadObj.type = specs.col;
+    		callback(specs, afterLoad, data);
+		}else if( notNull(typeObj[type]) ){
+			specs = typeObj[type];
+			if( notNull(specs.col) ) uploadObj.type = specs.col;
+    		callback(specs, afterLoad, data);
+		}else {
+			lazyLoad( baseUrl+'/plugins/'+type+'_dynform.js', 
+				null,
+				function() { 
+				  	alert(dynForm);
+				  	typeObj[type] = dynForm;
+					specs = typeObj[type];
+					if( notNull(specs.col) ) uploadObj.type = specs.col;
+    				callback(specs, afterLoad, data);
+			 });
+		}
+	},
 	openForm : function  (type, afterLoad,data) { 
 	    //mylog.clear();
 	    $.unblockUI();
 	    mylog.warn("--------------- Open Form "+type+" ---------------------",data);
 	    mylog.dir(data);
+	    //global variables clean up
 	    elementLocation = null;
 	    elementLocations = [];
 	    centerLocation = null;
 	    updateLocality = false;
-	    
 
 	    if(userId)
 		{
-			if(typeof type == "object"){
-				specs = type;
-			}else{
-				formType = type;
-				console.log(type);
-				specs = typeObj[type];
-			}
-	    	uploadObj.type = specs.col;
-	    
-			mylog.dir(specs);
-			$("#ajax-modal").removeClass("bgEvent bgOrga bgProject bgPerson bgDDA").addClass(specs.bgClass);
-			$("#ajax-modal-modal-title").html("<i class='fa fa-refresh fa-spin'></i> Chargement en cours. Merci de patienter.");
-			$(".modal-header").removeClass("bg-purple bg-green bg-orange bg-yellow bg-lightblue ").addClass(specs.titleClass);
-		  	$("#ajax-modal-modal-body").html( "<div class='row bg-white'>"+
-		  										"<div class='col-sm-10 col-sm-offset-1'>"+
-								              	"<div class='space20'></div>"+
-								              	//"<h1 id='proposerloiFormLabel' >Faire une proposition</h1>"+
-								              	"<form id='ajaxFormModal' enctype='multipart/form-data'></form>"+
-								              	"</div>"+
-								              "</div>");
-		  	$('.modal-footer').hide();
-		  	$('#ajax-modal').modal("show");
-		  	afterLoad = ( notNull(afterLoad) ) ? afterLoad : null;
-		  	data = ( notNull(data) ) ? data : {};
-		  	elementLib.buildDynForm(specs, afterLoad, data);
+			elementLib.getDynFormObj(type, function() { 
+				elementLib.starBuild(specs,afterLoad,data);
+			},afterLoad, data);
 		} else {
 			toastr.error("Vous devez être connecté pour afficher les formulaires de création");
 			showPanel('box-login');
 		}
 	},
-
+	starBuild : function  (specs, afterLoad, data) {
+		mylog.dir(specs);
+		$("#ajax-modal").removeClass("bgEvent bgOrga bgProject bgPerson bgDDA").addClass(specs.bgClass);
+		$("#ajax-modal-modal-title").html("<i class='fa fa-refresh fa-spin'></i> Chargement en cours. Merci de patienter.");
+		$(".modal-header").removeClass("bg-purple bg-green bg-orange bg-yellow bg-lightblue ").addClass(specs.titleClass);
+	  	$("#ajax-modal-modal-body").html( "<div class='row bg-white'>"+
+	  										"<div class='col-sm-10 col-sm-offset-1'>"+
+							              	"<div class='space20'></div>"+
+							              	//"<h1 id='proposerloiFormLabel' >Faire une proposition</h1>"+
+							              	"<form id='ajaxFormModal' enctype='multipart/form-data'></form>"+
+							              	"</div>"+
+							              "</div>");
+	  	$('.modal-footer').hide();
+	  	$('#ajax-modal').modal("show");
+	  	afterLoad = ( notNull(afterLoad) ) ? afterLoad : null;
+	  	data = ( notNull(data) ) ? data : {}; 
+	  	elementLib.buildDynForm(specs, afterLoad, data);
+	},
 	buildDynForm : function (elementObj, afterLoad,data) { 
 		mylog.warn("--------------- buildDynForm", elementObj, afterLoad,data);
 		if(userId)
@@ -2389,6 +2446,18 @@ var elementLib = {
 			toastr.error("Vous devez être connecté pour afficher les formulaires de création");
 			showPanel('box-login');
 		}
+	},
+
+	//generate Id for upload feature of this element 
+	setMongoId : function(type) { 
+		uploadObj.type = type;
+		if( !$("#ajaxFormModal #id").val() )
+		{
+			getAjax( null , baseUrl+"/api/tool/get/what/mongoId" , function(data){
+				uploadObj.id = data.id;
+				$("#ajaxFormModal #id").val(data.id)
+			});
+		}
 	}
 }
 
@@ -2399,7 +2468,11 @@ var elementLib = {
 var contextData = null;
 var uploadObj = {
 	type : null,
-	id : null
+	id : null,
+	set : function(type,id){
+		uploadObj.type = type;
+		uploadObj.id = id;
+	}
 };
 var typeObj = {
 	"themes":{ 
@@ -2460,9 +2533,11 @@ var typeObj = {
 			    noSubmitBtns : true,
 			    properties : {
 			    	image :{
-		            	inputType : "image",
+		            	inputType : "uploader",
+		            	showUploadBtn : true,
 		            	init : function() { 
-		            		setTimeout( function(){
+		            		setTimeout( function()
+		            		{
 			            		$('#trigger-upload').click(function() {
 						        	$('.fine-uploader-manual-trigger').fineUploader('uploadStoredFiles');
 						        	loadByHash(location.hash);
@@ -2547,8 +2622,6 @@ var typeObj = {
 			}
 		}},
 	"persons" : {col:"citoyens" , ctrl:"person"},
-	"citoyen" : {col:"citoyens" , ctrl:"person"},
-	"citoyens" : {col:"citoyens" , ctrl:"person",color:"yellow",icon:"user"},
 	"poi":{ 
 		col:"poi",
 		ctrl:"poi",
@@ -2560,16 +2633,6 @@ var typeObj = {
 			    title : "Formulaire Point d'interet",
 			    icon : "map-marker",
 			    type : "object",
-			    beforeBuild : function(){
-			    	//generate Id for upload feature of this element 
-			    	uploadObj.type = 'poi';
-	    			if( !$("#ajaxFormModal #id").val() ){
-	    				getAjax( null , baseUrl+"/api/tool/get/what/mongoId" , function(data){
-		    				uploadObj.id = data.id;
-		    				$("#ajaxFormModal #id").val(data.id)
-		    			});
-		    		}
-			    },
 			    onLoads : {
 			    	//pour creer un subevnt depuis un event existant
 			    	subPoi : function(){
@@ -2589,9 +2652,16 @@ var typeObj = {
 				    	$("#ajaxFormModal #parentType").val( "citoyens" ); 
 				    }
 			    },
+			    beforeBuild : function(){
+			    	elementLib.setMongoId('poi');
+			    },
 				afterSave : function(){
 					if( $('.fine-uploader-manual-trigger').fineUploader('getUploads').length > 0 )
 				    	$('.fine-uploader-manual-trigger').fineUploader('uploadStoredFiles');
+				    else {
+				    	elementLib.closeForm();
+				    	loadByHash( location.hash );	
+				    }
 			    },
 			    properties : {
 			    	info : {
@@ -2609,7 +2679,7 @@ var typeObj = {
 			            rules : { required : true }
 			        },
 			        image :{
-		            	inputType : "image",
+		            	inputType : "uploader",
 		            	afterUploadComplete : function(){
 					    	elementLib.closeForm();
 			                loadByHash( location.hash );	
@@ -2652,6 +2722,8 @@ var typeObj = {
 			    }
 			}
 		}},
+	"citoyen" : {col:"citoyens" , ctrl:"person"},
+	"citoyens" : {col:"citoyens" , ctrl:"person",color:"yellow",icon:"user"},
 	"siteurl":{ 
 		col:"siteurl",
 		ctrl:"siteurl",
@@ -2738,9 +2810,20 @@ var typeObj = {
 			    title : trad.addOrganization,
 			    icon : "group",
 			    type : "object",
+			    beforeBuild : function(){
+			    	elementLib.setMongoId('organizations');
+			    },
 			    beforeSave : function(){
 			    	if (typeof $("#ajaxFormModal #description").code === 'function' ) 
 			    		$("#ajaxFormModal #description").val( $("#ajaxFormModal #description").code() );
+			    },
+			    afterSave : function(){
+					if( $('.fine-uploader-manual-trigger').fineUploader('getUploads').length > 0 )
+				    	$('.fine-uploader-manual-trigger').fineUploader('uploadStoredFiles');
+				    else {
+				    	elementLib.closeForm();
+				    	loadByHash( location.hash );	
+				    }
 			    },
 			    properties : {
 			    	info : {
@@ -2783,6 +2866,13 @@ var typeObj = {
 		              inputType : "tags",
 		              placeholder : "Tags ou Types de l'organisation",
 		              values : tagsList
+		            },
+		            image :{
+		            	inputType : "uploader",
+		            	afterUploadComplete : function(){
+					    	elementLib.closeForm();
+			                loadByHash( "#organization.detail.id."+uploadObj.id );	
+					    },
 		            },
 		            location : {
 		               inputType : "location"
@@ -2903,6 +2993,17 @@ var typeObj = {
 			    		}
 			    	}
 			    },
+			    beforeBuild : function(){
+			    	elementLib.setMongoId('events');
+			    },
+			    afterSave : function(){
+					if( $('.fine-uploader-manual-trigger').fineUploader('getUploads').length > 0 )
+				    	$('.fine-uploader-manual-trigger').fineUploader('uploadStoredFiles');
+				    else {
+				    	elementLib.closeForm();
+				    	loadByHash( location.hash );	
+				    }
+			    },
 			    beforeSave : function(){
 			    	//alert("onBeforeSave");
 			    	
@@ -3017,6 +3118,13 @@ var typeObj = {
 		            	placeholder : "Type d\'évènement",
 		            	options : eventTypes,
 		            	rules : { required : true },
+		            },
+		            image :{
+		            	inputType : "uploader",
+		            	afterUploadComplete : function(){
+					    	elementLib.closeForm();
+			                loadByHash( "#event.detail.id."+uploadObj.id );	
+					    },
 		            },
 		            allDay : {
 		            	inputType : "checkbox",
@@ -3177,7 +3285,19 @@ var typeObj = {
 			    		 	$("#ajaxFormModal #parentType").val( contextData.type ); 
 			    		 	$("#ajax-modal-modal-title").html($("#ajax-modal-modal-title").html()+" sur "+contextData.name );
 			    	}
-			    },beforeSave : function(){
+			    },
+			    beforeBuild : function(){
+			    	elementLib.setMongoId('projects');
+			    },
+			    afterSave : function(){
+					if( $('.fine-uploader-manual-trigger').fineUploader('getUploads').length > 0 )
+				    	$('.fine-uploader-manual-trigger').fineUploader('uploadStoredFiles');
+				    else {
+				    	elementLib.closeForm();
+				    	loadByHash( location.hash );	
+				    }
+			    },
+			    beforeSave : function(){
 			    	if( typeof $("#ajaxFormModal #description").code === 'function' ) 
 			    		$("#ajaxFormModal #description").val( $("#ajaxFormModal #description").code() );
 			    },
@@ -3207,6 +3327,13 @@ var typeObj = {
 		            	placeholder : "Type d\'évènement",
 		            	options : eventTypes,
 		            	rules : { required : true },
+		            },
+		            image :{
+		            	inputType : "uploader",
+		            	afterUploadComplete : function(){
+					    	elementLib.closeForm();
+			                loadByHash( "#project.detail.id."+uploadObj.id );	
+					    },
 		            },
 		            /*allDay : {
 		            	inputType : "checkbox",
@@ -4160,8 +4287,6 @@ var js_templates = {
       		tplObj.key = (notNull(obj.key)) ? ' data-key="'+obj.key+'"' : ""; 
 			tplObj.color = (notNull(obj.color)) ? obj.color : "white"; 
 			tplObj.tooltip = (notNull(obj.tooltip)) ? 'data-toggle="tooltip" data-placement="left" title="'+tooltip+'"' : ""; 
-			tplObj.path = (notNull(obj.path)) ? obj.path : "";
-			tplObj.thumb = (notNull(obj.thumb)) ? obj.thumb : "";
 			return tplObj;
 		},
 
@@ -4172,7 +4297,7 @@ var js_templates = {
 		//el_open/el_close :: is a container for each element of the list rendering
 		loop : function(obj,tpl,tplparams)
 		{
-      		var str = (notNull(tplparams.open)) ? tplparams.open : "";
+      		var str = (notNull(tplparams) && notNull(tplparams.open)) ? tplparams.open : "";
       		var cleanup = false;
       		$.each(obj ,function(k,v){
           		if( !notNull( v.classes ) && notNull(tplparams) && notNull( tplparams.classes )){
@@ -4181,13 +4306,13 @@ var js_templates = {
           		}
         		if( !notNull( v.parentClass ) && notNull(tplparams) && notNull( tplparams.parentClass ))
            			v.parentClass = tplparams.parentClass;
-         		var opener = (notNull(tplparams.el_open)) ? tplparams.el_open : "";
+         		var opener = (notNull(tplparams) && notNull(tplparams.el_open)) ? tplparams.el_open : "";
 		     	str += opener+js_templates[tpl]( v );
-         		if(notNull(tplparams.el_close)) str += tplparams.el_close;
+         		if(notNull(tplparams) && notNull(tplparams.el_close)) str += tplparams.el_close;
          		if(cleanup)
          			delete v.classes;
 		   	});
-        	if(notNull(tplparams.close)) str += tplparams.close;
+        	if(notNull(tplparams) && notNull(tplparams.close)) str += tplparams.close;
 		   	return str;
 		},
 
@@ -4229,28 +4354,82 @@ var js_templates = {
 
 		album : function (obj) 
 		{ 
-			var tplObj = js_templates.objectify(obj);
-			return //' <div class="portfolio-item">'+
-					' <a class="thumb-info '+tplObj.classes+'" href="'+tplObj.path+'" data-lightbox="all">'+
-						' <img src="'+tplObj.thumb+'" class="img-responsive" alt="'+objbj.name+'">'+
-					' </a>';
-					//' </div>' ;
+			isDoc = (obj.name.toLowerCase().indexOf(".pdf")>0) ? true : false;
+			target = (isDoc) ? " target='_blanck'" : "";
+			str = ' <div class="col-xs-3 portfolio-item" id="'+obj.id+'">'+
+				' <a class="thumb-info pull-left '+obj.classes+'" '+target+' href="'+obj.path+'/'+obj.name+'" data-lightbox="all">';
+			
+			if( isDoc )
+				str += '<i class="fa fa-file-text-o fa-x5"></i>';
+			else
+				str += ' <img src="'+obj.path+'/medium/'+obj.name+'" class="img-responsive" alt="'+obj.name+'">';
+
+			str += ' </a>'+
+					( ( notNull(userId) && obj.author == userId) ? ' <br/><a class="btnRemove" href="javascript:;" data-id="'+obj.id+'" data-key="" data-name="'+obj.name+'" ><i class="fa text-red fa-trash"></i> </a>' : '')+
+					'</div>' ;
+			return str;
 				
 		},
 
 	};
 
+//*********************************************************************************
+// smallMenu Photo Albums
+//*********************************************************************************
 var album = {
 	show : function (id,type){
+		uploadObj.type = type;
+		uploadObj.id = id;
 		getAjax( null , baseUrl+'/'+moduleId+"/document/list/id/"+id+"/type/"+type+"/tpl/json" , function( data ) { 
 			
 			console.dir(data);
-			smallMenu.build( data , 
-			    function( params ){ return js_templates.loop( params, "album" ); },
+			smallMenu.build( 
+				data.list , 
+			    function( params ){ 
+			    	str = '<style>.thumb-info{height:200px; overflow: hidden; position: relative; } .thumb-info img{}</style><a class="pull-left btn bg-red addPhotoBtn" data-type="'+type+'" data-id="'+id+'" href="javascript:;"> Ajouter des Photos <i class="fa fa-plus"></i></a>'+
+							"<div class='homestead titleSmallMenu' style='font-size:35px'> Album <i class='fa fa-angle-right'></i> "+data.element.name+" </div><br/>"+
+							js_templates.loop( params, "album" );
+					return str;
+				},
 			    function(){
-			        $(".labelCount").html('(0)');
+			    	$(".addPhotoBtn").click(function() { 
+			    		uploadObj.type = type;
+			    		uploadObj.id = id;
+						elementLib.openForm("addPhoto");
+			    	});
+			    	album.delete();
 			    });
 		});
+	},
+	delete : function(){
+		$(".portfolio-item .btnRemove").off().on("click", function(e){
+			e.preventDefault();
+			var imageId = $(this).data("id");
+			var params =  { 
+				"parentId": uploadObj.id, 
+				"parentType": uploadObj.type, 
+				"docId" : imageId};
+			console.dir(params);
+			bootbox.confirm( trad.areyousuretodelete+"<span class='text-red'> "+$(this).data("name")+"</span> ?", 
+				function(result) {
+					if(result){
+						$.ajax({
+							url: baseUrl+"/"+moduleId+"/document/delete/dir/"+moduleId+"/type/"+uploadObj.type+"/parentId/"+uploadObj.id,
+							type: "POST",
+							dataType : "json",
+							data: params,
+							success: function(data){
+								if(data.result){
+									toastr.success(data.msg);
+									$("#"+imageId).remove();
+								}else{
+									toastr.error(data.error)
+								}
+							}
+						})
+					}
+				})
+		})
 	}
 }
 

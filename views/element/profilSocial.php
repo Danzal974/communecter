@@ -1,6 +1,12 @@
 
 
 <?php 
+
+	$cssAnsScriptFilesModule = array(
+		'/js/news/newsHtml.js'
+	);
+	HtmlHelper::registerCssAndScriptsFiles($cssAnsScriptFilesModule, $this->module->assetsUrl);
+
 	HtmlHelper::registerCssAndScriptsFiles( 
 		array(  '/css/onepage.css',
 				'/css/profilSocial.css',
@@ -9,8 +15,12 @@
 				'/css/news/index.css',	
 				'/css/timeline2.css',
 				'/css/circle.css',	
+				'/css/default/directory.css',	
+				'/js/comments.js',
 			  ) , 
 		Yii::app()->theme->baseUrl. '/assets');
+
+
 
 
 	$imgDefault = $this->module->assetsUrl.'/images/thumbnail-default.jpg';
@@ -28,6 +38,8 @@
     $iconColor = Element::getColorIcon($typeItemHead) ? Element::getColorIcon($typeItemHead) : "";
 
     $useBorderElement = false;
+
+    if(@Yii::app()->params["front"]) $front = Yii::app()->params["front"];
 ?>
 <style>
 	.header{
@@ -78,6 +90,47 @@
     	margin-top:4px;
     }
 
+
+#central-container .bg-dark {
+    color: white !important;
+    background-color: #3C5665 !important;
+}
+#central-container .bg-red{
+    background-color:#E33551 !important;
+    color:white!important;
+}
+#central-container .bg-blue{
+    background-color: #5f8295 !important;
+    color:white!important;
+}
+#central-container .bg-green{
+    background-color:#93C020 !important;
+    color:white!important;
+}
+#central-container .bg-orange{
+    background-color:#FFA200 !important;
+    color:white!important;
+}
+#central-container .bg-yellow{
+    background-color:#FFC600 !important;
+    color:white!important;
+}
+#central-container .bg-purple{
+    background-color:#8C5AA1 !important;
+    color:white!important;
+}
+#central-container #dropdown_search{
+	min-height:500px;
+    margin-top:30px;
+}
+#central-container .row.headerDirectory{
+    margin-top: 20px;
+    display: none;
+}
+#central-container p {
+    font-size: 13px;
+}
+
 </style>
 
 	
@@ -102,7 +155,7 @@
 			<h3 class="text-left margin-10 padding-left-15 pull-left">
 				<?php echo @$element["name"]; ?>		
 			</h3>
-			<a href="#co2.page.type.citoyens.id.580827a8da5a3bca128b456b" target="_blank" class="font-blackoutM letter-red bold">
+			<a href="#co2.page.type.citoyens.id.580827a8da5a3bca128b456b?tpl=onepage" target="_blank" class="font-blackoutM letter-red bold">
 				  <i class="fa fa-external-link"></i> <span class="hidden-xs hidden-sm">Page</span> web
 			</a>
 			<br>
@@ -130,13 +183,23 @@
     
 	<div class="col-xs-12 col-sm-4 col-md-4 col-lg-3 margin-top-70 profilSocial">        
 	    <?php 
-	    	$this->renderPartial('../pod/ficheInfoElementCO2', 
-                        array(  //"layoutPath"=>$layoutPath , 
-                                "element" => @$element, 
+	    	$params = array(    "element" => @$element, 
                                 "type" => @$type, 
                                 "edit" => @$edit,
                                 "countries" => @$countries,
-                                "tags" => @$tags) ); 
+                                "tags" => @$tags,
+                                "controller" => $controller,
+                                "openEdition" => $openEdition,
+                                "countStrongLinks" => $countStrongLinks,
+                                "countLowLinks" => $countLowLinks,
+                                );
+
+	    	if(@$members) $params["members"] = $members;
+	    	if(@$events) $params["events"] = $events;
+	    	if(@$needs) $params["needs"] = $needs;
+	    	if(@$projects) $params["projects"] = $projects;
+
+	    	$this->renderPartial('../pod/ficheInfoElementCO2', $params ); 
 	    ?>
 	</div>
         
@@ -184,8 +247,7 @@
 			
 		</div>
 
-		<div class="col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-4 col-lg-6 col-lg-offset-3">
-			<div id="central-container"></div>
+		<div class="col-md-6 col-md-offset-4 col-sm-8 col-sm-offset-4 col-lg-6 col-lg-offset-3" id="central-container">
 		</div>
 
 
@@ -200,7 +262,7 @@
 			}
 		</style>
 
-		<div class="col-md-2 col-sm-3 col-lg-3 hidden-sm hidden-xs notif-column margin-top-15">
+		<div class="col-md-2 col-sm-3 col-lg-3 hidden-sm hidden-xs margin-top-15" id="notif-column">
 			<div class="alert alert-info">
 				<a href="#..."><i class="fa fa-times text-dark padding-5"></i></a> 
 				<span>
@@ -250,7 +312,12 @@
 
 	var elementName = "<?php echo @$element["name"]; ?>";
     var contextType = "<?php echo @$type; ?>";
-    
+    var members = <?php echo json_encode(@$members); ?>;
+    var params = <?php echo json_encode(@$params); ?>;
+    var dateLimit = 0;
+    var typeItem = "<?php echo $typeItem; ?>";
+
+    console.log("params", params);
 
 	jQuery(document).ready(function() {
 		initSocial();
@@ -296,6 +363,8 @@
 		}	
 
 		var accordion = new Accordion($('#accordion'), false);
+		var accordion2 = new Accordion($('#accordion2'), false);
+		var accordion3 = new Accordion($('#accordion3'), false);
 
    		$(".tooltips").tooltip();
 
@@ -314,14 +383,18 @@
 		isLive = isLiveBool==true ? "/isLive/true" : ""; 
 		dateLimit = 0;
 		scrollEnd = false;
-		var url = "news/index/type/citoyens/id/<?php echo (string)$element["_id"] ?>"+isLive+"/date/"+dateLimit+"?isFirst=1&tpl=co2&renderPartial=true";
-		console.log("URL", url);
+
+		toogleNotif(true);
+
+		var url = "news/index/type/"+typeItem+"/id/<?php echo (string)$element["_id"] ?>"+isLive+"/date/"+dateLimit+
+				  "?isFirst=1&tpl=co2&renderPartial=true";
+		
 		$('#central-container').html("<i class='fa fa-spin fa-refresh'></i>");
 		ajaxPost('#central-container', baseUrl+'/'+moduleId+'/'+url, 
 			null,
 			function(){ 
 				$(window).bind("scroll",function(){ 
-				    if(!loadingData && !scrollEnd){
+				    if(!loadingData && !scrollEnd && colNotifOpen){
 				          var heightWindow = $("html").height() - $("body").height();
 				          if( $(this).scrollTop() >= heightWindow - 400){
 				            loadStream(currentIndexMin+indexStep, currentIndexMax+indexStep, isLiveBool);
@@ -336,9 +409,12 @@ function loadStream(indexMin, indexMax, isLiveBool){ console.log("LOAD STREAM PR
 	loadingData = true;
 	currentIndexMin = indexMin;
 	currentIndexMax = indexMax;
+	
+
+	if(typeof dateLimit == "undefined") dateLimit = 0;
 
 	isLive = isLiveBool==true ? "/isLive/true" : "";
-	var url = "news/index/type/citoyens/id/<?php echo (string)$element["_id"] ?>"+isLive+"/date/"+dateLimit+"?tpl=co2&renderPartial=true";
+	var url = "news/index/type/"+typeItem+"/id/<?php echo (string)$element["_id"] ?>"+isLive+"/date/"+dateLimit+"?tpl=co2&renderPartial=true";
 	$.ajax({ 
         type: "POST",
         url: baseUrl+"/"+moduleId+'/'+url,
@@ -369,6 +445,20 @@ function loadStream(indexMin, indexMax, isLiveBool){ console.log("LOAD STREAM PR
     });
 }
 
+var colNotifOpen = true;
+function toogleNotif(open){
+		if(typeof open == "undefined") open = false;
+		
+		if(open==false){
+			$('#notif-column').removeClass("col-md-2 col-sm-3 col-lg-3").addClass("hidden");
+			$('#central-container').removeClass("col-md-6 col-sm-8 col-lg-6").addClass("col-md-8 col-sm-8 col-lg-9");
+		}else{
+			$('#notif-column').addClass("col-md-2 col-sm-3 col-lg-3").removeClass("hidden");
+			$('#central-container').addClass("col-md-6 col-sm-8 col-lg-6").removeClass("col-md-8 col-sm-8 col-lg-9");
+		}
+
+		colNotifOpen = open;
+	}
 </script>
 
 
