@@ -590,6 +590,9 @@ var loadableUrls = {
     
     "#thing.index" : {title:'IMPORT DATA ', icon : 'download'},
 	"#thing.graph" : {title:'IMPORT DATA ', icon : 'download'},
+	"#thing.scklastestreadings" : {title:'IMPORT DATA ', icon : 'download'},
+	"#city.creategraph" : {title:'CITY ', icon : 'university', menuId:"btn-geoloc-auto-menu" }, //TODO cjd: Enlever avant pull request
+	"#city.graphcity" : {title:'CITY ', icon : 'university', menuId:"btn-geoloc-auto-menu" }, //TODO cjd: Enlever avant pull request
     
     "#default.live" : {title:"FLUX'Direct" , icon : 'heartbeat', menuId:"menu-btn-live"},
 	"#default.login" : {title:'COMMUNECTED AGENDA ', icon : 'calendar'},

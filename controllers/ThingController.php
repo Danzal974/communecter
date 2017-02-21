@@ -16,7 +16,8 @@ class ThingController extends CommunecterController {
   	public function actions(){
 	    return array(
           'index'                     => 'citizenToolKit.controllers.thing.IndexAction',
-          'graph'                   	=> 'citizenToolKit.controllers.thing.GetGraphAction'
+          'graph'                   	=> 'citizenToolKit.controllers.thing.GetGraphAction',
+          'scklastestreadings'        => 'citizenToolKit.controllers.thing.GetLastestReadingAction'
           
         );
 	}

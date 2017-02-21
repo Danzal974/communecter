@@ -10,17 +10,52 @@ $cs = Yii::app()->getClientScript();
 	  		'/plugins/d3/d3.v3.min.js',
         '/plugins/d3/c3.min.js',
         '/plugins/d3/c3.min.css',
-        '/plugins/d3/d3.v4.min.js'
+        '/plugins/d3/d3.v4.min.js',
+
 	  	);
 	  	HtmlHelper::registerCssAndScriptsFiles($cssAnsScriptFilesModule, Yii::app()->request->baseUrl);
   	// }
 
 ?>
-<div class="col-xs-12" id="">
-<h3 class="panel-title text-blue"> Les graphes </h3>
+
+<div class="panel panel-white col-sm-12 col-md-10">
+  <section class="col-sm-12 panel-title">
+    <div class="col-sm-12"> 
+      <form class="form-inline"> 
+        <div class="form-group col-sm-12">
+          <label for="select" class="col-xs-12 col-sm-3 control-label">Graphe(s)</label>
+
+          <select class="control-select col-xs-11 col-sm-8" name="sensor" id="sensorSelector" onchange="showSensor()">
+            <option value="1">Température et humidité</option>
+            <option value="2">Énergies</option>
+            <option value="3">Luminosité</option>
+            <option value="4">CO2 et NO2</option>
+            <option value="5">Bruit</option>
+            <option value="6">Tous les graphes</option>
+          </select>
+        </div>
+        <div class="form-group col-sm-12">
+          <label class="col-xs-12 col-sm-3 control-label" for="from">Période</label>
+          
+          <span class="input-group col-xs-12 col-sm-8">
+            <input class="form-group" type="text" id="from" name="from"> 
+            <input class="form-group" type="text" id="to" name="to">
+          </span>
+         
+                
+          
+        </div>
+
+
+      </form>
+    </div>
+  </section>
+
 
 </div>
-<div id="graphs"> </div>
+
+
+<div class="col-xs-12" id="graphs"> </div>
 
 
 
@@ -53,25 +88,80 @@ line = d3.line()
  vXn.setDate((vXn.getDate()-1));
  var dXnISO = vXn.toISOString();
  vYn = 0; //min
- vYm = 0;
+ vYm = 1;
 
 //Variable SCK 
 // TODO : recuperer les device ID sck inscrit dans les POI
-var listDevice = ["2531","4139","3151", "3188", "3422", "4122", "1693", "3208"];// 
+var listDevice = ["2531","4162"];//,"4139","3151", "3188", "3422", "4122", "1693", "3208", "4164"];// 
 // TODO : recuperer les sensor id pour chauque device par lastest readings API SC
 var sckSensorIds = [{bat : 17}, {hum : 13},{temp : 12},{no2 : 15}, { co: 16}, {noise : 7}, {solarPV : 18},{ambLight : 14 }];
 var tRollup = "rollup="+30+"m";
 
 //functions 
+
+function showSensor(){
+  var value = $("#sensorSelector").val();
+  hideAllGraph();
+  var list=[];
+  switch(value) {
+    case "1": //temp et hum
+      list.push(12,13);
+      break;
+    case "2": //energie : batt et solarPV
+      list.push(17,18);
+      break;
+    case "3": //lum
+      list.push(14);
+      break;
+    case "4": //co no2
+      list.push(15,16);
+      break; 
+    case "5": //bruit : noise
+      list.push(7);
+      break;
+    case "6":
+      showAllGraph();
+      break
+    default:
+      
+      break;
+  } 
+  for(var s=0;s<list.length; s++){
+    var divGraph = "graphe_"+list[s];
+    showGraph(divGraph);
+  }
+}
+
+// Fonctions pour cacher et montrer les graphe
+  function showAllGraph(){
+    $(".graphs").show();
+  }
+
+function showGraph(divGraph){
+  $("#"+divGraph).show();
+  //d3.select("#"+divGraph).attr("visibility","visible");
+}
+
+function hideAllGraph(){
+  $(".graphs").hide();
+}
+
+function hideGraph(divGraph){
+  $("#"+divGraph).hide();
+  //d3.select("#"+divGraph).attr("visibility","hidden");
+}
+
+//
 function setSVGForSensor(sensor) {
 
   var svgId = "sensor"+sensor;
+  var divGraph = "graphe_"+sensor;
   var gId = svgId+"_g";
   console.log(svgId);
 
-  var svgObj = d3.select("#graphes")
+  var svgObj = d3.select("#"+divGraph)
       .append("svg").attr("width",svgwidth).attr("height",svgheight)
-      .attr("id", svgId);
+      .attr("id", svgId);   //.style("visibility","hidden");
   var g = svgObj.append("g").attr("transform", "translate(" + gmargin.left + "," + gmargin.top + ")").attr("id", gId);
 
     //gwidth = +svgObj.attr("width") - margin.left - margin.right,
@@ -87,16 +177,18 @@ function setSVGForSensor(sensor) {
       gid : gId , 
       domain : {Yn : vYn, Ym : vYm, Xn : vXn, Xm : vXm , domainInitialized : false},
       devices : [],
+      divgraphid : divGraph,
   };
 
-  console.dir(objGraph);
+  //console.dir(objGraph);
 
    //Voir si on peu ce passer de la mise en tableau
    var indexObjGraphe = (multiGraphe.push(objGraph)) - 1 ;
-   console.log(indexObjGraphe);
+   //console.log(indexObjGraphe);
   return indexObjGraphe; 
 
 }
+
 
 function updateTheDomain(xArray,yArray,indexGraphe){
   var yChanged = false;
@@ -105,8 +197,6 @@ function updateTheDomain(xArray,yArray,indexGraphe){
   var Ym = multiGraphe[indexGraphe].domain.Ym;
   var Xn = multiGraphe[indexGraphe].domain.Xn;
   var Xm = multiGraphe[indexGraphe].domain.Xm;
-
-
  
   if( yArray[0] < Yn || Yn == 0) {
       multiGraphe[indexGraphe].domain.Yn = yArray[0]; yChanged = true; } //min
@@ -128,7 +218,7 @@ function updateTheDomain(xArray,yArray,indexGraphe){
 }
 
 function setAxisXY(indexGraphe){
-  console.log(indexGraphe);
+  //console.log(indexGraphe);
 
   var gId = multiGraphe[indexGraphe].gid;
   var g = d3.select("#"+gId);
@@ -136,22 +226,36 @@ function setAxisXY(indexGraphe){
   var yAxisId="yAxis"+ multiGraphe[indexGraphe].svgid; 
   var height = multiGraphe[indexGraphe].dimension.height;
 
-    d3.select("#"+xAxisId).remove();    // TODO refaire la selection sur le graphe sensor
+  d3.select("#"+xAxisId).remove();    // TODO refaire la selection sur le graphe sensor
   d3.select("#"+yAxisId).remove();
     
     g.append("g")
       .attr("id", xAxisId)
       .attr("class", "theAxis")
       .attr("transform", "translate(0," + gheight + ")")
-      .call(d3.axisBottom(x));
+      .call(d3.axisBottom(x))
+      .append("text")
+      .attr("fill","#000")
+      .attr("x", 1000)
+      .attr("text-anchor","end")
+      .text("time")
+      ;
 
     g.append("g")
       .attr("id", yAxisId)
       .attr("class", "theAxis")
-      .call(d3.axisLeft(y));
+      .call(d3.axisLeft(y))
+      .append("text")
+      .attr("fill","#000")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 8)
+      .attr("dy", "0.71em")
+      .attr("text-anchor","end")
+      .text("unité")
+      ;
   
 }
-
+//TODO : réglé le pb de color utiliser find dans array 
 function setStrokeColorForDevice(device) {
 
   var stId = "sCol_"+device;
@@ -219,28 +323,63 @@ function graphe(device,sensors,readings,svgG){
   tracer(de,device,sensors,strkCol,svgG);
   
 }
+/*
+  $( function() {
+    var dateFormat = "mm/dd/yy",
+      from = $( "#from" )
+        .datepicker({
+          defaultDate: "+1w",
+          changeMonth: true,
+          numberOfMonths: 3
+        })
+        .on( "change", function() {
+          to.datepicker( "option", "minDate", getDate( this ) );
+        }),
+      to = $( "#to" ).datepicker({
+        defaultDate: "+1w",
+        changeMonth: true,
+        numberOfMonths: 3
+      })
+      .on( "change", function() {
+        from.datepicker( "option", "maxDate", getDate( this ) );
+      });
+ 
+    function getDate( element ) {
+      var date;
+      try {
+        date = $.datepicker.parseDate( dateFormat, element.value );
+      } catch( error ) {
+        date = null;
+      }
+ 
+      return date;
+    }
+  } );
+*/
 
 
 
 jQuery(document).ready(function() {
 
   setTitle("Mesures","cog");
-  var init = true;
 
  sckSensorIds.forEach(function (item){ 
 
     for( var e in item) {
       sensorId = item[e];
       var nametitle= "graphe_"+sensorId;
-
-      var grapheTitle = d3.select("#graphs").append("h4")
-        .attr("id","nametitle").text("Graphe du capteur "+sensorId+" :" );
+    
+      var grapheTitle = d3.select("#graphs")
+        .append("div").attr("id",nametitle)
+        .attr("class","graphs col-xs-12");
+      $("#"+nametitle).hide();
+      
       var svgG = setSVGForSensor(sensorId); 
-      //init domain
 
+      //TODO : Adapter la largeur des graphe à l'écran de l'utilisateur
 
     for ( var i = 0; i< listDevice.length ; i++) {
-    var urlReq="https://api.smartcitizen.me/v0/devices/"+listDevice[i]+"/readings?sensor_id="+sensorId+"&"+tRollup+"&from="+dXnISO+"&to="+dXmISO;
+      var urlReq="https://api.smartcitizen.me/v0/devices/"+listDevice[i]+"/readings?sensor_id="+sensorId+"&"+tRollup+"&from="+dXnISO+"&to="+dXmISO;
       
       console.log(urlReq);
 
@@ -252,7 +391,7 @@ jQuery(document).ready(function() {
       dataType: "json",
       crossDomain: true,
       success: function (data) {
-        console.dir(data);
+        //console.dir(data);
         var dRead = data;
         var readings = dRead.readings;
 
@@ -262,7 +401,7 @@ jQuery(document).ready(function() {
         
         if (readings.length>=1){
 
-          console.log(device);
+        //  console.log(device);
           graphe(device,sensor,readings,svgG); 
         }
 
@@ -275,11 +414,10 @@ jQuery(document).ready(function() {
       
     }
 
-
   }
  });
-    
-    
+
+ showSensor(); 
    
 });
 

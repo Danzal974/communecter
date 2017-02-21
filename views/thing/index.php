@@ -18,16 +18,16 @@ $cs = Yii::app()->getClientScript();
             <div class="" style="cursor:pointer;" onclick="loadByHash('#thing.graph')">
               <i class="fa fa-user fa-2x"></i>
                 
-              <?php echo Yii::t("thing", "GRAPH", null, Yii::app()->controller->module->id); ?>
+              <?php echo Yii::t("thing", "GRAPHES", null, Yii::app()->controller->module->id); ?>
               
             </div>
           </li>
           
           <li class="list-group-item text-yellow col-md-4 col-sm-6 link-to-directory">
-            <div class="" style="cursor:pointer;" onclick="loadByHash('#thing.graph')">
+            <div class="" style="cursor:pointer;" onclick="loadByHash('#thing.scklastestreadings')">
               <i class="fa fa-user fa-2x"></i>
                 
-              <?php echo Yii::t("thing", "GRAPH", null, Yii::app()->controller->module->id); ?>
+              <?php echo Yii::t("thing", "DERNIERES MESURES", null, Yii::app()->controller->module->id); ?>
               
             </div>
           </li>
