@@ -11,12 +11,29 @@ $cs = Yii::app()->getClientScript();
         '/plugins/d3/c3.min.js',
         '/plugins/d3/c3.min.css',
         '/plugins/d3/d3.v4.min.js',
+        //DatePicker
+        '/plugins/bootstrap-datepicker/js/bootstrap-datepicker.js' ,
+        '/plugins/bootstrap-datepicker/js/locales/bootstrap-datepicker.fr.js' ,
+        '/plugins/bootstrap-datepicker/css/datepicker.css',
+  
+        //DateTime Picker
+        '/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js' , 
+        '/plugins/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.fr.js' , 
+        '/plugins/bootstrap-datetimepicker/css/datetimepicker.css',
 
 	  	);
 	  	HtmlHelper::registerCssAndScriptsFiles($cssAnsScriptFilesModule, Yii::app()->request->baseUrl);
   	// }
 
 ?>
+
+<!--link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet" />
+<script type="text/javascript">
+    $('head').append('<link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/jquery-editable/css/jquery-editable.css" rel="stylesheet" />');
+    $.fn.poshytip={defaults:null};
+</script-->
+
+
 
 <div class="panel panel-white col-sm-12 col-md-10">
   <section class="col-sm-12 panel-title">
@@ -25,7 +42,7 @@ $cs = Yii::app()->getClientScript();
         <div class="form-group col-sm-12">
           <label for="select" class="col-xs-12 col-sm-3 control-label">Graphe(s)</label>
 
-          <select class="control-select col-xs-11 col-sm-8" name="sensor" id="sensorSelector" onchange="showSensor()">
+          <select class="control-select col-xs-11 col-sm-8 form-control" name="sensor" id="sensorSelector" onchange="showSensor()">
             <option value="1">Température et humidité</option>
             <option value="2">Énergies</option>
             <option value="3">Luminosité</option>
@@ -35,14 +52,26 @@ $cs = Yii::app()->getClientScript();
           </select>
         </div>
         <div class="form-group col-sm-12">
-          <label class="col-xs-12 col-sm-3 control-label" for="from">Période</label>
           
-          <span class="input-group col-xs-12 col-sm-8">
+          <div class="hide no-all-day-range">
+              <span class="input-icon">
+                <input type="text" class="event-range-date form-control" name="eventRangeDate" placeholder="Range date"/>
+                <i class="fa fa-clock-o"></i> 
+              </span>
+            
+          </div>
+          <div class="hide all-day-range">
+              <span class="input-icon">
+                <input type="text" class="event-range-date form-control" name="ad_eventRangeDate" placeholder="Range date"/>
+                <i class="fa fa-calendar"></i> 
+              </span>
+            
+          </div>
+          <label class="hide col-xs-12 col-sm-3 control-label" for="from">Période</label>
+          <span class="hide input-group col-xs-12 col-sm-8">
             <input class="form-group" type="text" id="from" name="from"> 
             <input class="form-group" type="text" id="to" name="to">
-          </span>
-         
-                
+          </span>     
           
         </div>
 
@@ -92,10 +121,10 @@ line = d3.line()
 
 //Variable SCK 
 // TODO : recuperer les device ID sck inscrit dans les POI
-var listDevice = ["2531","4162"];//,"4139","3151", "3188", "3422", "4122", "1693", "3208", "4164"];// 
+var listDevice = ["2531","4162","4151"];//,"4139","3151", "3188", "3422", "4122", "1693", "3208", "4164"];// 
 // TODO : recuperer les sensor id pour chauque device par lastest readings API SC
 var sckSensorIds = [{bat : 17}, {hum : 13},{temp : 12},{no2 : 15}, { co: 16}, {noise : 7}, {solarPV : 18},{ambLight : 14 }];
-var tRollup = "rollup="+30+"m";
+var tRollup = "rollup="+10+"m";
 
 //functions 
 
@@ -217,7 +246,7 @@ function updateTheDomain(xArray,yArray,indexGraphe){
 
 }
 
-function setAxisXY(indexGraphe){
+function setAxisXY(indexGraphe,sensorkey){
   //console.log(indexGraphe);
 
   var gId = multiGraphe[indexGraphe].gid;
@@ -251,7 +280,7 @@ function setAxisXY(indexGraphe){
       .attr("y", 8)
       .attr("dy", "0.71em")
       .attr("text-anchor","end")
-      .text("unité")
+      .text(sensorkey)
       ;
   
 }
@@ -380,7 +409,8 @@ jQuery(document).ready(function() {
 
     for ( var i = 0; i< listDevice.length ; i++) {
       var urlReq="https://api.smartcitizen.me/v0/devices/"+listDevice[i]+"/readings?sensor_id="+sensorId+"&"+tRollup+"&from="+dXnISO+"&to="+dXmISO;
-      
+      var sensorkey = "";
+
       console.log(urlReq);
 
       $.ajax({
@@ -395,9 +425,10 @@ jQuery(document).ready(function() {
         var dRead = data;
         var readings = dRead.readings;
 
+
         var device = dRead.device_id;
         var sensor = dRead.sensor_id;
-        var sensorkey= dRead.sensor_key;
+        sensorkey= dRead.sensor_key;
         
         if (readings.length>=1){
 
@@ -410,7 +441,7 @@ jQuery(document).ready(function() {
       //console.log(data); 
       }
 
-      }).done(function() {setAxisXY(svgG); });    
+      }).done(function() {setAxisXY(svgG,sensorkey); });    
       
     }
 
