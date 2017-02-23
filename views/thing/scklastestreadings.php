@@ -62,7 +62,7 @@ $sensors = $lastReadDevice["data"]["sensors"];
 </section>
 
 	<div>
-	<?php $urlsPois = Thing::getSCKDeviceInPOI("RE",array("urls"));
+	<?php $urlsPois = Thing::getSCKDeviceIDsByPOI();
 			var_dump($urlsPois);
 			echo "<br>";
           		//foreach ($urlsPois as $value) {
@@ -124,8 +124,11 @@ function getDeviceReadings(){
 
 
 
-	var sensors = <?php $obj = Thing::getLastedReadViaAPI();
-	echo json_encode($obj);
+	var sensors = <?php 
+		$obj = Thing::getLastedReadViaAPI();
+		$sensors = $obj['sensors'];
+
+	echo json_encode($sensors);
 	 ?> ;
 
 	var tbody = document.getElementById("tbody");
