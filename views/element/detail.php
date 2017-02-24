@@ -35,7 +35,7 @@ $cssAnsScriptFilesModule = array(
 	'/js/activityHistory.js'
 );
 HtmlHelper::registerCssAndScriptsFiles($cssAnsScriptFilesModule, $this->module->assetsUrl);
-
+$element["name"] = htmlspecialchars($element["name"]);
 
 // Initialize $front array()
 // - Define which element is visible following current theme (communecter, network, notragora)
@@ -50,7 +50,7 @@ else if(@$networkJson && @$networkJson["skin"]["menu"]) $menuConfig = $networkJs
     $('head').append('<link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/jquery-editable/css/jquery-editable.css" rel="stylesheet" />');
     $.fn.poshytip={defaults:null};
 </script>
-<script>
+<script type="text/javascript" >
 if($('#breadcum').length)
 	$('#breadcum').html('<i class="fa fa-search fa-2x" style="padding-top: 10px;padding-left: 20px;"></i><i class="fa fa-chevron-right fa-1x" style="padding: 10px 10px 0px 10px;""></i><a href="javascript:;" onclick="reverseToRepertory();">Répertoire</a><i class="fa fa-chevron-right fa-1x" style="padding: 10px 10px 0px 10px;""></i><?php echo addslashes($element["name"]); ?>');
 </script>
@@ -109,7 +109,7 @@ if($('#breadcum').length)
 	    				"edit" => @$edit,
 	    				"isLinked" => @$isLinked,
 	    				"openEdition" => $openEdition,
-	    				"modeEdit" => @$modeEdit,
+	    				//"modeEdit" => @$modeEdit,
 	    				"controller" => $controller
 	    			);
 	    			$this->renderPartial('../poi/ficheInfo',$params); 
@@ -123,20 +123,20 @@ if($('#breadcum').length)
 	    				"element" => $element,
 						"tags" => $tags, 
 						"images" => array("profil"=>array($element["profilImageUrl"])),
-						"elementTypes" => @$listTypes,
-						"countries" => $countries,
-						"typeIntervention" => @$typeIntervention,
-						"NGOCategories" => @$NGOCategories,
-						"localBusinessCategories" => @$localBusinessCategories,
+						//"elementTypes" => @$listTypes,
+						//"countries" => $countries,
+						//"typeIntervention" => @$typeIntervention,
+						//"NGOCategories" => @$NGOCategories,
+						//"localBusinessCategories" => @$localBusinessCategories,
 	    				"contextMap" => @$contextMap,
-	    				"publics" => @$public,
+	    				//"publics" => @$public,
 						"type" => @$type,
 						"organizer" =>@$organizer,
 	    				"contentKeyBase" => "profil",
 	    				"edit" => @$edit,
 	    				"isLinked" => @$isLinked,
 	    				"openEdition" => $openEdition,
-	    				"modeEdit" => @$modeEdit,
+	    				//"modeEdit" => @$modeEdit,
 	    				"controller" => $controller
 	    			);
 	    			$this->renderPartial('../pod/ficheInfoElement',$params); 
@@ -250,8 +250,8 @@ if($('#breadcum').length)
 				                <div class="col-md-12 no-padding" style="margin-top:20px">
 
 				                    <div class="col-xs-6  center text-yellow btnSubTitle">
-				                        <a href="javascript:elementLib.openForm('person')" class="btn btn-discover bg-yellow">
-
+				                        <!-- <a href="javascript:elementLib.openForm('person')" class="btn btn-discover bg-yellow"> -->
+				                        <a href="#person.invite" class="btn btn-discover bg-yellow lbh">
 				                          <i class="fa fa-user"></i>
 				                        </a><br/><span class="discover-subtitle">Une personne</span>
 				                    </div>

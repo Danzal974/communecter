@@ -71,13 +71,11 @@
 	}
 
 	.favElBtn{
-		color: #FC4D4D !important;
-		padding: 6px;
-		margin-bottom: 4px;
+		/*color: #FC4D4D !important;*/
+		/*padding: 6px;
+		margin-bottom: 4px;*/
 	}
-	#listTags{
-		text-align: right;
-	}
+	
 </style>
 <div id="menu-name" class="hidden">
 	<img src="<?php echo $thumbAuthor; ?>" height="45" class="img-circle">
@@ -256,20 +254,60 @@
 			</li>
 		</ul>
 
+		<ul id="accordion4" class="accordion shadow2 margin-top-20">
+
+			<!-- COMMUNAUTÉ -->
+			<?php //if($type != Person::COLLECTION){ ?>
+			<li class="podInside community">
+				<div class="link">
+					<i class="fa fa-connectdevelop"></i> Communauté 
+					<small>(<?php echo @$members ? count($members) : "0"; ?>)</small>
+					<i class="fa fa-chevron-down"></i>
+				</div>
+				<ul class="submenu">
+		 			<?php $this->renderPartial('../pod/usersList', array(  $controller => $element,
+														"users" => @$members,
+														"userCategory" => Yii::t("common","Community"), 
+														"contentType" => $type,
+														"countStrongLinks" => $countStrongLinks,
+														"countLowLinks" => $countLowLinks,
+														"admin" => $edit, 
+														"invitedMe" => @$invitedMe,
+														"openEdition" => $openEdition)); ?>
+					<div class="text-right padding-10">
+
+						<?php if(@$edit==true && $type!=Person::COLLECTION) { ?>
+						<button data-toggle="modal" data-target="#modal-scope"
+								class="btn btn-default letter-blue margin-top-5">
+					    	<b><i class="fa fa-plus"></i> Ajouter un membre</b>
+						</button> 
+						<?php } ?>
+
+						<button class="btn btn-default letter-blue open-directory margin-top-5">
+					    	<b><i class="fa fa-connectdevelop"></i> Afficher la communauté <i class="fa fa-chevron-right"></i></b>
+						</button>
+						
+					</div>	
+				</ul>			
+			</li>
+			<?php //} ?>
+		</ul>
+		
+
 		<ul id="accordion2" class="accordion shadow2 margin-top-20">
 		
 			<!-- CONTACTS -->
 			<?php if (($type==Project::COLLECTION || $type==Organization::COLLECTION || $type==Event::COLLECTION)){ ?>
 			<li class="podInside">
 				<div class="link">
-					<i class="fa fa-user-circle"></i> Contacts 
+					<i class="fa fa-user-circle"></i> Nous contacter
 					<small>(<?php echo @$element["contacts"] ? count($element["contacts"]) : "0"; ?>)</small>
 					<i class="fa fa-chevron-down"></i>
 				</div>
 				<ul class="submenu">
 					<?php 
 					$contacts = ( empty($element["contacts"]) ? array() : $element["contacts"] ) ;
-					$this->renderPartial('../pod/contactsList',array( 	"contacts" => $contacts, 
+					$this->renderPartial('../pod/contactsList',array( 	"contacts" => @$contacts, 
 																		"contextId" => (String) $element["_id"],
 																		"contextType" => $controller,
 																		"authorised" => $edit,
@@ -314,7 +352,7 @@
 			<?php if( $type!=Event::COLLECTION && ( !@$front || (@$front && $front["need"]==true))){ ?>
 	    	<li class="podInside needs">
 				<div class="link">
-					<i class="fa fa-cubes"></i> Nos besoins 
+					<i class="fa fa-cubes"></i> <?php if( $type!=Person::COLLECTION){ ?>Nos<?php }else{ ?>Mes<?php } ?> besoins 
 					<small>(<?php echo @$needs ? count($needs) : "0"; ?>)</small>
 					<i class="fa fa-chevron-down"></i>
 				</div>
@@ -340,43 +378,9 @@
 
 		</ul>
 
-		<ul id="accordion3" class="accordion shadow2 margin-top-20">
 
-			<!-- COMMUNAUTÉ -->
-			<?php if($type != Person::COLLECTION){ ?>
-			<li class="podInside events">
-				<div class="link">
-					<i class="fa fa-connectdevelop"></i> Communauté 
-					<!-- <small>(<?php echo @$countLowLinks ? count($countLowLinks) : "0"; ?>)</small> -->
-					<i class="fa fa-chevron-down"></i>
-				</div>
-				<ul class="submenu">
-		 			<?php $this->renderPartial('../pod/usersList', array(  $controller => $element,
-														"users" => $members,
-														"userCategory" => Yii::t("common","Community"), 
-														"contentType" => $type,
-														"countStrongLinks" => $countStrongLinks,
-														"countLowLinks" => $countLowLinks,
-														"admin" => $edit, 
-														"invitedMe" => @$invitedMe,
-														"openEdition" => $openEdition)); ?>
-					<div class="text-right padding-10">
-						<?php if(@$edit==true) { ?>
-						<button data-toggle="modal" data-target="#modal-scope"
-								class="btn btn-default letter-blue margin-top-5">
-					    	<b><i class="fa fa-plus"></i> Ajouter un membre</b>
-						</button> 
-						<?php } ?>
-						<button class="btn btn-default letter-blue open-directory margin-top-5 tooltips" 
-								data-toggle="tooltip" data-placement="right" title="Afficher tout">
-					    	<i class="fa fa-chevron-right"></i>
-						</button>
-						
-					</div>	
-				</ul>			
-			</li>
-			<?php } ?>
-						
+		<ul id="accordion3" class="accordion shadow2 margin-top-20">
+				
 			<!-- PROJETS -->
 			<?php if ($type==Organization::COLLECTION){ 
 				if(!@$front || (@$front && $front["project"])){ 
@@ -384,7 +388,7 @@
 			<li class="podInside events">
 				<div class="link">
 					<i class="fa fa-lightbulb-o"></i> Projets 
-					<small>(<?php echo @$element["collections"] ? count($element["events"]) : "0"; ?>)</small>
+					<small>(<?php echo @$projects ? count($projects) : "0"; ?>)</small>
 					<i class="fa fa-chevron-down"></i>
 				</div>
 				<ul class="submenu">
@@ -401,8 +405,7 @@
 					    	<b><i class="fa fa-plus"></i> Nouveau projet</b>
 						</button> 
 						<?php } ?>
-						<button class="btn btn-default letter-blue open-directory margin-top-5" 
-								data-toggle="tooltip" data-placement="right" title="Afficher tout">
+						<button class="btn btn-default letter-blue open-directory margin-top-5">
 					    	<i class="fa fa-chevron-right"></i>
 						</button>
 						
@@ -433,7 +436,7 @@
 							<i class="fa fa-chevron-down"></i>
 						</div>
 						<ul class="submenu">
-							<?php	$this->renderPartial('../pod/eventsList',array( 	"events" => $events, 
+							<?php	$this->renderPartial('../pod/eventsList',array( 	"events" => @$events, 
 																						"contextId" => (String) $element["_id"],
 																						"contextType" => $controller,
 																						"list" => $eventTypes,
@@ -474,8 +477,10 @@
 		</ul>
 
 
+		
+
 		<?php if ($type==Project::COLLECTION || $type==Organization::COLLECTION){ ?>
-			<div class="col-xs-12 no-padding podchart padding-10 accordion">
+			<div class="col-xs-12 no-padding podchart padding-10 accordion margin-top-15">
 				<?php
 					if(empty($element["properties"]["chart"])) $element["properties"]["chart"] = array();
 					$this->renderPartial('../chart/index',array(
@@ -490,18 +495,6 @@
 			</div>
 		<?php } ?>
 
-		<?php if( !$type==Event::COLLECTION && ( !@$front || (@$front && $front["need"]==true))){ ?>
-	    	<div class="col-xs-12 needsPod">	
-				<?php $this->renderPartial('../pod/needsList',array( 	"needs" => @$needs, 
-																		"parentId" => (String) $element["_id"],
-																		"parentType" => $type,
-																		"isAdmin" => @$edit,
-																		"parentName" => $element["name"],
-																		"openEdition" => $openEdition
-																	  )); ?>
-
-			</div>
-		<?php } ?>
 <?php 
 	$element["type"] = $type;
 	$element["id"] = (string)$element["_id"];
@@ -721,10 +714,14 @@
 
 		smallMenu.inBlockUI = false; 
 		smallMenu.destination = "#central-container"; 
-			
+		directory.elemClass = smallMenu.destination+' .searchEntityContainer ';
+
+		mylog.log("tagg1 smallMenu.destination", smallMenu.destination);
+		
 		$(".open-directory").click(function(){
 			toogleNotif(false);
-			smallMenu.openAjax(baseUrl+'/'+moduleId+'/element/directory/type/'+contextType+'/id/'+contextId+'?tpl=json','Communauté','fa-book','red');
+			smallMenu.openAjax(baseUrl+'/'+moduleId+'/element/directory/type/'+contextType+'/id/'+contextId+
+								'?tpl=json','Communauté','fa-connectdevelop','dark');
 		});
 
 		$(".btn-open-collection").click(function(){
