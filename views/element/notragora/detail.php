@@ -135,7 +135,7 @@
 	    display: block;
 	    width: 100%;
 	    max-width: 100%;
-	    min-height: 90px;
+	    /*min-height: 90px;*/
 	    max-height: 90px;
 	    overflow: hidden;
 	    background-color: #d3d3d3;
@@ -159,20 +159,18 @@
 	#fileuploadContainer .thumbnail{
 		border-radius: 0px!important
 	}
-	#profil_imgPreview{
-
-	}
+	#profil_imgPreview{}
 </style>
 	<div class="col-lg-10 col-md-10 col-sm-9 no-padding" id="onepage">
 
-		<?php if ($type == "poi"){ ?>
-			<?php if(@$element["type"]=="video" && @$element["medias"]){ 
+		<?php 
+		if ($type == "poi"){ 
+			if(@$element["type"]=="video" && @$element["medias"]){ 
 				$videoLink=str_replace ( "autoplay=1" , "autoplay=0" , @$element["medias"][0]["content"]["videoLink"]  );
 			?>
 				<div class="col-xs-12">
 					<div class="embed-responsive embed-responsive-16by9">
 						<iframe class="embed-responsive-item fullScreen" src="<?php echo @$videoLink ?>" allowfullscreen></iframe>
-						<button onclick="makeFullScreen()">Make Full Screen</button>
 					</div>
 				</div>
 				<div class="col-md-12 col-sm-12 col-xs-12 text-dark center">
@@ -216,7 +214,15 @@
 		<div class="col-md-12 padding-15 menubar">
 			<button class="btn btn-default btn-menubar" id="btn-menu-home">A PROPOS</button>
 			<button class="btn btn-default btn-menubar" id="btn-menu-stream">CARNET DE BORD</button>
-			<button class="btn btn-default btn-menubar" id="btn-menu-directory-poi">PRODUCTIONS</button>
+			<?php if( $type != Person::COLLECTION){?>
+				<button class="btn btn-default btn-menubar" id="btn-menu-directory-poi">PRODUCTIONS</button>
+			<?php } ?>
+
+			<?php if(isset(Yii::app()->session["userId"]) && Yii::app()->session["userId"] == @$element["creator"]){ ?>
+			<button onclick='javascript:elementLib.openForm("poi","subPoi")' class='btn btn-default pull-right btn-menubar'>
+				<i class='fa fa-plus'></i> <i class='fa fa-video-camera'></i> Ajouter une production
+			</button>
+			<?php } ?>
 		</div>
 		<?php } ?>
 		<div id="section-home">
@@ -283,52 +289,54 @@
 			
 		</div>
 
-		<div id="section-directory" class="col-md-12">
-		
-		</div>
+
+		<div id="section-directory" class="col-md-12"></div>
 	</div>
 
 
 
 	<div class="col-lg-2 col-md-2 col-sm-3 col-members">
-		<?php if($type=="poi"){ ?>
+		<?php if($type=="poi"){ 
+				//var_dump($parent);
+				$spec = Element::getElementSpecsByType( @$parent["typeSig"] );
+			?>
 			<h3>Réalisé par</h3>
 			<hr>
 			<div class='col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding'>
 				<div class="contentEntity">
-				<a href="#project.detail.id.<?php echo $parent["id"] ?>" class="container-img-parent lbh add2fav">
+				<a href="#<?php echo $spec["hash"]; echo @$parent["id"]?>" class="container-img-parent lbh add2fav">
 					<?php
 					$imgProfil = "<i class='fa fa-image fa-2x'></i>";
 					if(@$parent["profilImageUrl"] && !empty($parent["profilImageUrl"])){
-						$imgProfil= "<img class='img-responsive' src='".Yii::app()->createUrl('/'.$this->module->id."/".$parent["profilImageUrl"])."'/>";
+						$imgProfil= "<img class='img-responsive' src='".Yii::app()->createUrl($parent["profilImageUrl"])."'/>";
             		} 
 					echo $imgProfil;
                 	?>
 				</a>
 				<div class="padding-10 informations">
-				<a href='#project.detail.id.<?php echo $parent["id"] ?>' class='entityName text-dark lbh add2fav text-light-weight margin-bottom-5'>
-                    <?php echo $parent["name"] ?> 
+				<a href='#<?php echo $spec["hash"]; echo @$parent["id"]?>' class='entityName text-dark lbh add2fav text-light-weight margin-bottom-5'>
+                    <?php echo @$parent["name"] ?> 
                 </a>
                 </div>
                 </div>
 			</div>
 		<?php } else { ?>
-		<h3>Membres du groupe (<span id="nbMemberTotal"></span>)</h3>
-		<hr>
-		<h4>Administrateurs (<span id="nbAdmin"></span>)</h4>
+			<h3>Membres du groupe (<span id="nbMemberTotal"></span>)</h3>
+			<hr>
+			<h4>Administrateurs (<span id="nbAdmin"></span>)</h4>
 
-		<?php 
-			//var_dump($members);
-			$nbAdmin = 0;
-			if(@$members && !empty($members)) {
-				foreach($members as $key => $member){ 
-					if(@$member["isAdmin"] == true){ $nbAdmin++;
-					$profilThumbImageUrl = Element::getImgProfil($member, "profilThumbImageUrl", $this->module->assetsUrl);
-		?>
-			<a href="#"  class="lbh col-md-12 no-padding margin-top-5 elipsis">
-				<img class="img-circle" src="<?php echo $profilThumbImageUrl; ?>" height=35 width=35> 
-				<span class="username-min"><?php echo @$member["name"]; ?></span>
-			</a>
+			<?php 
+				$nbAdmin = 0;
+				if(@$members && !empty($members)) {
+					foreach($members as $key => $member){ 
+						if(@$member["isAdmin"] == true){ $nbAdmin++;
+						$profilThumbImageUrl = Element::getImgProfil($member, "profilThumbImageUrl", $this->module->assetsUrl);
+						$spec = Element::getElementSpecsByType( @$member["type"] );
+			?>
+						<a href="#<?php echo $spec["hash"]; echo @$member["id"]?>"  class="lbh col-md-12 no-padding margin-top-5 elipsis">
+							<img class="img-circle" src="<?php echo $profilThumbImageUrl; ?>" height=35 width=35> 
+							<span class="username-min"><?php echo @$member["name"]; ?></span>
+						</a>
 		<?php }}} ?>
 
 		<div class="col-md-12 no-padding margin-top-5">
@@ -343,8 +351,9 @@
 				foreach($members as $key => $member){ 
 					if(!isset($member["isAdmin"]) || @$member["isAdmin"]==false){ $nbMember++;
 					$profilThumbImageUrl = Element::getImgProfil($member, "profilThumbImageUrl", $this->module->assetsUrl);
+					$spec = Element::getElementSpecsByType( @$member["type"] );
 		?>
-			<a href="#"  class="lbh col-md-12 no-padding margin-top-5 elipsis">
+			<a href="#<?php echo $spec["hash"]; echo @$member["id"]?>"  class="lbh col-md-12 no-padding margin-top-5 elipsis">
 				<img class="img-circle" src="<?php echo $profilThumbImageUrl; ?>" height=35 width=35> 
 				<span class="username-min"><?php echo @$member["name"]; ?></span>
 			</a>
@@ -365,10 +374,44 @@
 		nbMember = "<?php echo @$nbMember; ?>";
 		nbAdmin = "<?php echo @$nbAdmin; ?>";
   	}
+  	<?php
+  	$showOdesc = true ;
+	if(Person::COLLECTION == $type){
+		$showLocality = (Preference::showPreference($element, $type, "locality", Yii::app()->session["userId"])?true:false);
+		$showOdesc = ((Preference::isOpenData($element["preferences"]) && Preference::isPublic($element, "locality"))?true:false);	
+	}
+  	$odesc = "" ;
+	if($showOdesc == true){
+		$controller = Element::getControlerByCollection($type) ;
+		if($type == Person::COLLECTION)
+			$odesc = $controller." : ".addslashes( strip_tags(json_encode(@$element["shortDescription"]))).",".addslashes(json_encode(@$element["address"]["streetAddress"])).",".@$element["address"]["postalCode"].",".@$element["address"]["addressLocality"].",".@$element["address"]["addressCountry"] ;
+		else if($type == Organization::COLLECTION)
+			$odesc = $controller." : ".@$element["type"].", ".addslashes( strip_tags(json_encode(@$element["shortDescription"]))).",".addslashes(json_encode(@$element["address"]["streetAddress"])).",".@$element["address"]["postalCode"].",".@$element["address"]["addressLocality"].",".@$element["address"]["addressCountry"];
+		else if($type == Event::COLLECTION)
+			$odesc = $controller." : ".@$element["startDate"].",".@$element["endDate"].",".addslashes(json_encode(@$element["address"]["streetAddress"])).",".@$element["address"]["postalCode"].",". @$element["address"]["addressLocality"].",".@$element["address"]["addressCountry"].",".addslashes(strip_tags(json_encode(@$element["shortDescription"])));
+		else if($type == Project::COLLECTION)
+			$odesc = $controller." : ".addslashes( strip_tags(json_encode(@$element["shortDescription"]))).",".addslashes(json_encode(@$element["address"]["streetAddress"])).",".@$element["address"]["postalCode"].",".@$element["address"]["addressLocality"].",".@$element["address"]["addressCountry"];
+	}
+		
+	?>
+  	var contextData = {
+		name : "<?php echo addslashes($element["name"]) ?>",
+		id : "<?php echo (string)$element["_id"] ?>",
+		type : "<?php echo $type ?>",
+		controller : <?php echo json_encode(Element::getControlerByCollection($type))?>,
+		otags : "<?php echo addslashes($element["name"]).",".$type.",communecter,".@$element["type"].",".addslashes(@implode(",", $element["tags"])) ?>",
+		creator : "<?php echo @$element["creator"] ?>",
+		odesc : <?php echo json_encode($odesc) ?>,
+		<?php 
+		if( @$element["startDate"] )
+			echo "'startDate':'".$element["startDate"]."',";
+		if( @$element["endDate"] )
+			echo "'endDate':'".$element["endDate"]."'"; ?>
+		
+	};	
+  	<?php $entitiesPois = PHDB::find( Poi::COLLECTION, array("parentId"=>(String) $element["_id"],"parentType"=>$type)); ?>
   	
-  	<?php $pois = PHDB::find(Poi::COLLECTION,array("parentId"=>(String) $element["_id"],"parentType"=>$type)); ?>
-
-  	var pois = <?php json_encode($pois); ?>
+  	var pois = <?php echo json_encode($entitiesPois); ?>
 
 	jQuery(document).ready(function() {
 	
@@ -387,7 +430,7 @@
 		$("#nbMember").html(nbMember);
 		$("#nbMemberTotal").html(nbAdmin+nbMember);
 
-		/*var url = "news/index/type/"+contextType+"/id/"+contextId+"?isFirst=1&";
+		var url = "news/index/type/"+contextType+"/id/"+contextId+"?isFirst=1&";
 		console.log("URL", url);
 		if(contextType=="projects" || contextType=="citoyens"){
 			ajaxPost('#timeline-page', baseUrl+'/'+moduleId+'/'+url+"renderPartial=true&tpl=co2&nbCol=2", 
@@ -400,7 +443,7 @@
 			getAjax('#comment-page',baseUrl+'/'+moduleId+"/comment/index/type/"+contextType+"/id/"+contextId,function(){ 
 					
 			},"html");
-		}*/
+		}
 		$(".deleteThisBtn").off().on("click",function () 
 		{
 			mylog.log("deleteThisBtn click");
@@ -440,7 +483,7 @@
 	        var btnClick = $(this);
 	        var id = $(this).data("id");
 	        var type = $(this).data("type");
-	        editElement(type,id);
+	        elementLib.editElement(type,id);
 		});
 
 		initMenuDetail();
@@ -489,7 +532,13 @@ function initMenuDetail(){
     	$("#section-directory").show();
 
     	var poisHtml = directory.showResultsDirectoryHtml(pois, "poi");
+
+    	//if( userId && userId == contextData.creator )
+    	//	poisHtml = poisHtml;
+    	
     	$("#section-directory").html(poisHtml);
+    	bindLBHLinks();
+		
 		// 	var type = "?type=poi";
  		//  ajaxPost('#section-directory', baseUrl+'/'+moduleId+"/default/directory"+type, 
 		// 	null,
