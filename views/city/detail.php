@@ -110,6 +110,7 @@ $this->renderPartial('../default/panels/toolbar');
         <a href="javascript:getWiki('<?php echo @$city["wikidataID"]; ?>')" class="pull-right">
           <img width=50 src="<?php echo $this->module->assetsUrl; ?>/images/logos/Wikipedia-logo-en-big.png">
         </a>
+    <!--  ici mettre le bouton open data smartcitizen a h   -->
         <i class="fa fa-university"></i><br>
         <?php if($cityGlobal == false) echo $city["cp"]; ?> 
         <?php
