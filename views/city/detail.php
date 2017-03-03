@@ -110,7 +110,10 @@ $this->renderPartial('../default/panels/toolbar');
         <a href="javascript:getWiki('<?php echo @$city["wikidataID"]; ?>')" class="pull-right">
           <img width=50 src="<?php echo $this->module->assetsUrl; ?>/images/logos/Wikipedia-logo-en-big.png">
         </a>
-    <!--  ici mettre le bouton open data smartcitizen a h   -->
+        <a href="javascript:getGraph('<?php echo $city["country"]; echo "','"; echo $city["cp"]; ?>')" class="pull-right">
+          <img width=50 title="Open Data Smart-Citizen-Kit" src="<?php echo $this->module->assetsUrl; ?>/images/home/valeurs/valeur01.png">
+        </a>
+
         <i class="fa fa-university"></i><br>
         <?php if($cityGlobal == false) echo $city["cp"]; ?> 
         <?php
@@ -733,8 +736,8 @@ var wikidata = null;
 var data_dbpedia = null;
 
 function getWiki(q){
-  //url = "https://wikidata.org/w/api.php?action=wbgetentities&format=json&ids="+q+"&props=claims&languages=fr";
-  url ="https://www.wikidata.org/wiki/Special:EntityData/"+q+".json" 
+  url = "https://wikidata.org/w/api.php?action=wbgetentities&format=json&ids="+q+"&props=claims&languages=fr";
+  //url ="https://www.wikidata.org/wiki/Special:EntityData/"+q+".json" 
   $.ajax({
         url:url,
         type:"GET",
@@ -1038,6 +1041,9 @@ var cityFinderObj = {
                    '<a href="javascript:cityFinderObj.finder(scopeType,scopeName)"><i class="fa fa-th text-grey"></i></a> <i class="fa fa-angle-right"></i> <i class="fa fa-map-marker text-yellow"></i> '+scopeName ,
                    params );
 } 
+
+
+
 };
 
 <?php 
@@ -1076,5 +1082,41 @@ function  initCurrentCityZones() {
         currentCityZones.push(zone);
     });
 }
+function show(){
+  console.log('button show');
+}
+
+function getGraph(country,cp){
+
+urlg=baseUrl+"/"+moduleId+"/thing/graph?country="+country+"&postalCode="+cp;
+//console.log(cp);
+//console.log(country);
+
+//console.log(urlg);
+  $.ajax({
+    type:"GET",
+    url: urlg,
+    dataType: "html",
+    //crossDomain: true,
+    success:function(data) {
+     $("#ajax-modal-modal-title").html("<div><h1 id='sckModalTitle'>Smart-Citizen-Kit "+
+      "<?php $cityNameSck=$city['name']; if(preg_match('/saint/i', $cityNameSck)){ echo 'à $cityNameSck'; }else{ echo 'au $cityNameSck';} ?>"+
+      "<button onclick='show()'> </button></h1></div>");
+     $("#ajax-modal-modal-body").html(data);
+     $('.modal-footer').show();
+     $('#ajax-modal').modal("show");
+
+    },
+    error: function (data) { console.log("Error : ajax not success"); 
+    //console.log(data); 
+    }
+
+    });//.done();
+    
+console.log( "boou" );
+
+}
+
+
 
 </script>

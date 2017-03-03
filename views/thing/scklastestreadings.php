@@ -61,25 +61,14 @@ $sensors = $lastReadDevice["data"]["sensors"];
   </div>
 </section>
 
-	<div>
-	<?php $urlsPois = Thing::getSCKDeviceIDsByPOI();
-			var_dump($urlsPois);
-			echo "<br>";
-          		//foreach ($urlsPois as $value) {
-          			# code...
-          		//	echo "<p>urls poi : $value</p>";
-          		//}
+	<div id="resphp">
+<!-- pour l'appel au fonction php -->
 
-          	  ?>
 	</div>
-	<div> 
-			<?php $macId="da:da:00:00:00:02";
 
+	<div id="resjs"> 
+			<!-- pour l'appel au fonction js -->
 
-			$lastestRecords = Thing::getLastestRecordsInDB($macId,2);
-			var_dump($lastestRecords);
-
-			?>
 	</div>
 
 

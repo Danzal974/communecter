@@ -16,7 +16,7 @@ $cs = Yii::app()->getClientScript();
 
           <li class="list-group-item text-yellow col-md-4 col-sm-6 link-to-directory">
             <div class="" style="cursor:pointer;" onclick="loadByHash('#thing.graph')">
-              <i class="fa fa-user fa-2x"></i>
+              <i class="fa fa-line-chart fa-2x"></i>
                 
               <?php echo Yii::t("thing", "GRAPHES", null, Yii::app()->controller->module->id); ?>
               
@@ -25,7 +25,7 @@ $cs = Yii::app()->getClientScript();
           
           <li class="list-group-item text-yellow col-md-4 col-sm-6 link-to-directory">
             <div class="" style="cursor:pointer;" onclick="loadByHash('#thing.scklastestreadings')">
-              <i class="fa fa-user fa-2x"></i>
+              <i class="fa fa-database fa-2x"></i>
                 
               <?php echo Yii::t("thing", "DERNIERES MESURES", null, Yii::app()->controller->module->id); ?>
               
