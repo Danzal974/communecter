@@ -34,15 +34,15 @@ $cs = Yii::app()->getClientScript();
 </script-->
 
 <?php
-//$field=array("deviceId");
+$field=array("deviceId");
 //$country="RE";
 //$postalCode="97490";
 if(empty($country) || !isset($country)){$country='RE';}
 if(empty($postalCode) || !isset($postalCode)){$postalCode='97490';} 
 else if (is_int($postalCode)){$postalCode=strval($postalCode);}
 
-//$devicesMongoRes = array();
-$devicesMongoRes = Thing::getSCKDevicesByCountryAndCP($country,$postalCode);//,$field);
+$devicesMongoRes = array();
+$devicesMongoRes = Thing::getSCKDevicesByCountryAndCP($country,$postalCode,$field);
 $devices=array();
 
 $sigDevicesForContextMap = array();
