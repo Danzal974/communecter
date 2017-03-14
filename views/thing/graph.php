@@ -1,7 +1,3 @@
-<?php 
-$cs = Yii::app()->getClientScript();
-?>
-
 <?php
 	$cs = Yii::app()->getClientScript();
 	// if(!Yii::app()->request->isAjaxRequest)
@@ -34,16 +30,14 @@ $cs = Yii::app()->getClientScript();
 </script-->
 
 <?php
-$field=array("deviceId");
-//$country="RE";
-//$postalCode="97490";
+
 if(empty($country) || !isset($country)){$country='RE';}
 if(empty($postalCode) || !isset($postalCode)){$postalCode='97490';} 
 else if (is_int($postalCode)){$postalCode=strval($postalCode);}
 
-$devicesMongoRes = array();
-$devicesMongoRes = Thing::getSCKDevicesByCountryAndCP($country,$postalCode,$field);
-$devices=array();
+$devicesMongoRes = Thing::getSCKDevicesByCountryAndCP($country,$postalCode);
+//$devices=array();
+//print_r($devicesMongoRes);
 
 $sigDevicesForContextMap = array();
 $infoSensors=array();
@@ -51,7 +45,7 @@ $infoSensors=array();
 $infoSensorsDeviceOk=false;
 foreach ($devicesMongoRes as $mdataDevice) {
   $devices[]=$mdataDevice;
-    
+  
   $sigDevicesForContextMap[]=array('geo' => $mdataDevice['geo'],'typeSig'=>'poi',
     'name'=> "sck".$mdataDevice['deviceId'],"_id"=>$mdataDevice["_id"], 'type'=>Thing::SCK_TYPE, 
     'address'=>$mdataDevice['address']);

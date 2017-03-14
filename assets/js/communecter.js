@@ -598,8 +598,9 @@ var loadableUrls = {
     "#thing.index" : {title:'IMPORT DATA ', icon : 'download'},
 	"#thing.graph" : {title:'IMPORT DATA ', icon : 'download'},
 	"#thing.scklastestreadings" : {title:'IMPORT DATA ', icon : 'download'},
-	"#city.creategraph" : {title:'CITY ', icon : 'university', menuId:"btn-geoloc-auto-menu" }, //TODO pour Dan: Enlever avant pull request (utiliser pour consulter le travail de Rapha)
-	"#city.graphcity" : {title:'CITY ', icon : 'university', menuId:"btn-geoloc-auto-menu" }, //TODO pour Dan: Enlever avant pull request (utiliser pour consulter le travail de Rapha)
+	"#thing.manage" : {title :'IMPORT DATA ', icon : 'download'},
+	//"#city.creategraph" : {title:'CITY ', icon : 'university', menuId:"btn-geoloc-auto-menu" }, //TODO pour Dan: Enlever avant pull request (utiliser pour consulter le travail de Rapha)
+	//"#city.graphcity" : {title:'CITY ', icon : 'university', menuId:"btn-geoloc-auto-menu" }, //TODO pour Dan: Enlever avant pull request (utiliser pour consulter le travail de Rapha)
     "#network.savoir" : {title:"En savoir plus" , icon : 'plus'},
     "#default.live" : {title:"FLUX'Direct" , icon : 'heartbeat', menuId:"menu-btn-live"},
 	"#default.login" : {title:'COMMUNECTED AGENDA ', icon : 'calendar'},
