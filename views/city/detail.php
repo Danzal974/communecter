@@ -1079,9 +1079,12 @@ function  initCurrentCityZones() {
         currentCityZones.push(zone);
     });
 }
+
 function show(){
   console.log('button show');
 }
+
+//$('#ajax-modal').on('hide', function(){ initCityMap();});
 
 function getGraph(country,cp){
 
@@ -1097,8 +1100,7 @@ urlg=baseUrl+"/"+moduleId+"/thing/graph?country="+country+"&postalCode="+cp;
     //crossDomain: true,
     success:function(data) {
      $("#ajax-modal-modal-title").html("<div><h1 id='sckModalTitle'>Smart-Citizen-Kit "+
-      "<?php $cityNameSck=$city['name']; if(preg_match('/saint/i', $cityNameSck)){ echo 'à $cityNameSck'; }else{ echo 'au $cityNameSck';} ?>"+
-      "<button onclick='show()'> </button></h1></div>");
+      "<?php $cityNameSck=$city['name']; if(preg_match('/saint/i', $cityNameSck)){ echo 'à '.$cityNameSck; }else{ echo 'au '.$cityNameSck;} ?>");
      $("#ajax-modal-modal-body").html(data);
      $('.modal-footer').show();
      $('#ajax-modal').modal("show");
@@ -1109,8 +1111,6 @@ urlg=baseUrl+"/"+moduleId+"/thing/graph?country="+country+"&postalCode="+cp;
     }
 
     });//.done();
-    
-console.log( "boou" );
 
 }
 

@@ -339,7 +339,7 @@ console.log(strockeColorArray);
   console.log(deviceId);
   console.log(idIM);
   //console.log(stId);
-  var legendILSC="<a href='https://smartcitizen.me/kits/"+deviceId+"'><i class='fa fa-minus' id='"+idIM+"' style='color:"+strkCol+";'></i> SCK device "+deviceId+"</a>";
+  var legendILSC="<a href='https://smartcitizen.me/kits/"+deviceId+"' target='_blank'><i class='fa fa-minus' id='"+idIM+"' style='color:"+strkCol+";'></i> SCK device "+deviceId+"</a>";
 
  // var iconMinus = "<i class='fa fa-minus' id='"+idIM+"' style='color:"+strkCol+";'></i>";
 
@@ -559,6 +559,7 @@ function showSCKDeviceOnMap(country,cp){
 jQuery(document).ready(function() {
 
   setTitle("Mesures","line-chart");
+  
   if(devices.length>0){
 
  sckSensorIds.forEach(function (item){ 
