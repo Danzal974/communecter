@@ -30,7 +30,8 @@
 </script-->
 
 <?php
-
+if(empty($nbDays) || !isset($nbDays) || $nbDays==0 ){$nbDays=1;}
+else if ($nbDays>31) { $nbDays=31; }
 if(empty($country) || !isset($country)){$country='RE';}
 if(empty($postalCode) || !isset($postalCode)){$postalCode='97490';} 
 else if (is_int($postalCode)){$postalCode=strval($postalCode);}
@@ -43,6 +44,7 @@ $sigDevicesForContextMap = array();
 $infoSensors=array();
 
 $infoSensorsDeviceOk=false;
+//todo : mutiliser les pois en objet sig, au lieu de construire des objets 
 foreach ($devicesMongoRes as $mdataDevice) {
   $devices[]=$mdataDevice;
   
@@ -163,9 +165,10 @@ foreach ($devicesMongoRes as $mdataDevice) {
               <i class="fa fa-calendar"></i> 
             </span>
         </div>-->
-
-        <label class="col-xs-12 col-sm-3 control-label" for="from">Période</label>
-        <span class="input-group col-xs-12 col-sm-8">
+        <!-- TODO faire un selecteur de nombre de jours qui fait un get avec graph?nbDay=x -->
+        <label class="col-sm-12" id="period"> </label>
+        <label class="hide col-xs-12 col-sm-3 control-label" for="from">Période</label>
+        <span class="hide input-group col-xs-12 col-sm-8">
           <input class="form-group" type="text" id="from" name="from"> 
           <input class="form-group" type="text" id="to" name="to">
         </span>     
@@ -191,6 +194,20 @@ foreach ($devicesMongoRes as $mdataDevice) {
 <script>
 
 //variable globale :
+nbDays=<?php echo $nbDays ?>;
+
+if(nbDays>0 && nbDays<=2){
+  tRollup = "rollup=10m";
+}else if (nbDays>2 && nbDays<=7 ){
+  tRollup = "rollup=20m";
+}else if (nbDays>7 && nbDays<=14) {
+  tRollup = "rollup=40m";
+} else {
+  tRollup = "rollup=1h";
+}
+
+$("#period").text("Graphe sur "+nbDays+" jours, "+tRollup);
+//console.log();
 
 svglegend={lwidth: 200, lheight: 100, }
 
@@ -216,7 +233,8 @@ line = d3.line()
  var vXm = new Date();
  var dXmISO = vXm.toISOString();
  var vXn = new Date();
- vXn.setDate((vXn.getDate()-1));
+
+ vXn.setDate((vXn.getDate()-nbDays));
  var dXnISO = vXn.toISOString();
  vYn = 0; //min
  vYm = 1;
@@ -238,7 +256,8 @@ devices.forEach(function(device){
 
 // TODO : recuperer les sensor id pour chaque device par lastest readings API SC
 var sckSensorIds = [{bat : 17}, {hum : 13},{temp : 12},{no2 : 15}, { co: 16}, {noise : 7}, {solarPV : 18},{ambLight : 14 }];
-var tRollup = "rollup="+20+"m";
+
+
 var infoSensors = <?php echo json_encode($infoSensors); ?>;
 //console.log(infoSensors);
 //functions 

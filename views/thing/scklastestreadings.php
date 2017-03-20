@@ -17,8 +17,9 @@ $cs = Yii::app()->getClientScript();
   	// }
 
 ?-->
-<?php
-if(empty($device) || !isset($device)){$device=4151; }
+<!--?php
+//(Page en chantier)
+if(empty($device) || !isset($device)){$device=0; }
 
 
 $sckdevicemdata = Thing::getSCKDeviceMdata(array("type"=>Thing::SCK_TYPE, "deviceId"=> strval($device)));
@@ -49,7 +50,7 @@ $sensors = $lReadingsAPI["sensors"];//
 //print_r($sensors);
 
 
-?>
+?-->
 
 <div class="col-sm-12 col-md-10 container">
   <section class="col-sm-12 row">
@@ -102,7 +103,7 @@ $sensors = $lReadingsAPI["sensors"];//
 
 function getDeviceReadings(){
   
-  var device = parseInt($("#deviceSelector").val());
+  //var device = parseInt($("#deviceSelector").val());
   //console.log(device);
   //hideAllGraph();
   /*
