@@ -26,7 +26,7 @@
   			echo "<div class='form-group col-sm-12' role='group'><span id='".
   				$mdataDevice['_id']."'> <label>Entrer l'adresse mac du sck ".$mdataDevice['deviceId']." : </label>".
   				" <input type='text' name='boardId' id='inputBoardId_sck".$mdataDevice['deviceId'].
-  				"'></span> <input class=' idMdataDevices' id='idsck".$mdataDevice['deviceId']."' value='".$mdataDevice['_id']."'> </div>";
+  				"'></span> <input class='idMdataDevices' id='idsck".$mdataDevice['deviceId']."' value='".$mdataDevice['_id']."' readonly> </div>";
 
   			//echo  $mdataDevice['deviceId']." <br> \n";
   			//echo  $mdataDevice['_id']." <br> \n";
