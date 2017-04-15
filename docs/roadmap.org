@@ -100,7 +100,8 @@ Liste des notifications déjà lues => #370 #453
 * ************************************************************  
 ** @Tib 
   [ ] annonces
-    [ ] top level types
+    [X] top level types
+    [ ] differents filtre apr section
     [ ] mes annonces
   * bugs
     [ ] dynSurvey photos
@@ -172,6 +173,13 @@ Liste des notifications déjà lues => #370 #453
       [ ] Nettoyer le code inutile
       * BUG
       [ ] Historique bug lorsqu'on ajoutes des contacts
+
+  * Refactor city / zone
+  [ ] Search.php
+    [X] DécouperGlobalAutoComplete en fonctions
+    [ ] Recherche par zones
+    [ ] Bugs
+      [ ] REcherche commune ne prend pas en compte les scopes
 
   * Import / Export 
   [.2] RSS (Personne, Orga, Projet, event, city, region, thematique, tags) => #523
