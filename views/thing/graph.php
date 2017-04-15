@@ -474,7 +474,7 @@ function fillArrayWithObjectTimestampsAndValues(readings){
     function(item){
       var ts = new Date();
       ts.setTime(Date.parse(item[0]));
-      ts.setSeconds(0)
+      ts.setSeconds(0); // sans ; ??
       item[1] = +item[1];
       d.push({timestamps : ts, values : item[1]});
     }
